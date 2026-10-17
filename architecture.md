@@ -29,31 +29,31 @@ Five visible states: idle (no query string), loading, results, no results, error
 /?origin=Enschede&destination=Hengelo&date=2026-10-20&passengers=2
 ```
 
-| Key | Value | Rule |
-| --- | --- | --- |
-| `origin` | string | required, non-empty after trimming, at most 100 characters |
-| `destination` | string | same; must differ from origin after normalisation |
-| `date` | `yyyy-mm-dd` | required; a local calendar day; today or later |
-| `passengers` | integer | required; 1 to 10 |
+| Key           | Value        | Rule                                                       |
+| ------------- | ------------ | ---------------------------------------------------------- |
+| `origin`      | string       | required, non-empty after trimming, at most 100 characters |
+| `destination` | string       | same; must differ from origin after normalisation          |
+| `date`        | `yyyy-mm-dd` | required; a local calendar day; today or later             |
+| `passengers`  | integer      | required; 1 to 10                                          |
 
 Parsing rules: key order is irrelevant; unknown keys are ignored; a duplicate key takes its first value; a missing or malformed key is a validation error; no query string at all is the idle state. The form's inputs carry these exact names, so `FormData` maps to the URL one to one. The URL is always written with `URLSearchParams`, never by string concatenation.
 
-| Address | Page state |
-| --- | --- |
-| `/` | Idle |
-| `/?origin=Enschede&destination=Hengelo&date=…&passengers=2` | Loading, then results |
-| `/?passengers=2&date=…&destination=Hengelo&origin=Enschede` | Same; order irrelevant |
-| `/?origin=enschede+&destination=HENGELO&date=…&passengers=1` | Results; trim and case folded |
-| `/?…&utm_source=mail` | Results; unknown key ignored |
-| `/?origin=Ensch&…` | No results; partial names do not match |
-| `/?origin=Enschede&destination=Amsterdam&…` | No results; unknown station is not an error |
-| `/?…&date=2025-04-20&…` | Validation error: past date; API not called |
-| `/?…&date=20-10-2026&…` | Validation error: date format |
-| `/?…&passengers=11` | Validation error: out of range |
-| `/?origin=Enschede&destination=Hengelo&date=…` | Validation error: passengers missing |
-| `/?origin=Enschede&origin=Almelo&…` | Results from Enschede; first value wins |
-| `/?origin=error&…` | Error state with retry |
-| `/?origin=%3Cscript%3E…` | No results; rendered as text only |
+| Address                                                      | Page state                                  |
+| ------------------------------------------------------------ | ------------------------------------------- |
+| `/`                                                          | Idle                                        |
+| `/?origin=Enschede&destination=Hengelo&date=…&passengers=2`  | Loading, then results                       |
+| `/?passengers=2&date=…&destination=Hengelo&origin=Enschede`  | Same; order irrelevant                      |
+| `/?origin=enschede+&destination=HENGELO&date=…&passengers=1` | Results; trim and case folded               |
+| `/?…&utm_source=mail`                                        | Results; unknown key ignored                |
+| `/?origin=Ensch&…`                                           | No results; partial names do not match      |
+| `/?origin=Enschede&destination=Amsterdam&…`                  | No results; unknown station is not an error |
+| `/?…&date=2025-04-20&…`                                      | Validation error: past date; API not called |
+| `/?…&date=20-10-2026&…`                                      | Validation error: date format               |
+| `/?…&passengers=11`                                          | Validation error: out of range              |
+| `/?origin=Enschede&destination=Hengelo&date=…`               | Validation error: passengers missing        |
+| `/?origin=Enschede&origin=Almelo&…`                          | Results from Enschede; first value wins     |
+| `/?origin=error&…`                                           | Error state with retry                      |
+| `/?origin=%3Cscript%3E…`                                     | No results; rendered as text only           |
 
 Note: in a client-rendered Vite application there is no form without JavaScript, so the matching input names are a simpler codec, not a no-JavaScript fallback.
 
@@ -135,13 +135,13 @@ The timetable carries no station time zone; a 09:00 departure is built in the br
 
 One validator, `validateJourneyParameters(raw, now)`, turns a record of raw strings into either a `ValidJourneyParameters` or a map of field to message. The form action and the URL parser both call it. `ValidJourneyParameters` is a branded type that only the validator can construct; `createSearchJourneys`'s wrapper and the query hook accept only that type, so the compiler proves the API cannot be called with unvalidated input.
 
-| Rule | Message |
-| --- | --- |
-| Origin non-empty after trimming, at most 100 characters | Enter an origin |
-| Destination non-empty, at most 100 characters | Enter a destination |
-| Destination differs from origin after normalisation | Destination must differ from origin |
-| Date is `yyyy-mm-dd`, today or later, compared as local calendar days | Choose a date from today onwards |
-| Passengers is an integer from 1 to 10 | Choose between 1 and 10 passengers |
+| Rule                                                                  | Message                             |
+| --------------------------------------------------------------------- | ----------------------------------- |
+| Origin non-empty after trimming, at most 100 characters               | Enter an origin                     |
+| Destination non-empty, at most 100 characters                         | Enter a destination                 |
+| Destination differs from origin after normalisation                   | Destination must differ from origin |
+| Date is `yyyy-mm-dd`, today or later, compared as local calendar days | Choose a date from today onwards    |
+| Passengers is an integer from 1 to 10                                 | Choose between 1 and 10 passengers  |
 
 The form:
 
@@ -166,24 +166,24 @@ TanStack Query v5 behind one hook, `useJourneySearch(search: string)`, which par
 
 Why a library for one call: results are keyed by the query key, so a response for a key no longer rendered is never shown and the stale-response race is removed structurally; the cache is keyed by the parsed URL parameters, so Back shows the previous table instantly; `enabled` tied to validation means the query does not exist until validation passed. A hand-written reducer is fully defensible for one call; the library is the standard tool for server state and the configuration below is where the judgement shows. React 19's `use()` is not a data-fetching solution on its own and is not used.
 
-| Option | Value | Why |
-| --- | --- | --- |
-| `retry` | `0` | The mock fails deterministically; a retry only delays the error state. Production would use one to three with backoff. |
-| `refetchOnWindowFocus`, `refetchOnReconnect` | `false` | A search re-running when the user returns to the tab is surprising. |
-| `staleTime` | 5 minutes | Back navigation shows the cached table with no refetch; results are not live data. |
-| `queryKey` | `['journeys', { origin, destination, date, passengers }]` | From validated, normalised parameters; `date` as the string so equal searches hash identically. |
-| `enabled` | `params !== null` | No query until validation passed. |
-| Devtools | development only | Lazy import behind `import.meta.env.DEV`; absent from the build. |
+| Option                                       | Value                                                     | Why                                                                                                                    |
+| -------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `retry`                                      | `0`                                                       | The mock fails deterministically; a retry only delays the error state. Production would use one to three with backoff. |
+| `refetchOnWindowFocus`, `refetchOnReconnect` | `false`                                                   | A search re-running when the user returns to the tab is surprising.                                                    |
+| `staleTime`                                  | 5 minutes                                                 | Back navigation shows the cached table with no refetch; results are not live data.                                     |
+| `queryKey`                                   | `['journeys', { origin, destination, date, passengers }]` | From validated, normalised parameters; `date` as the string so equal searches hash identically.                        |
+| `enabled`                                    | `params !== null`                                         | No query until validation passed.                                                                                      |
+| Devtools                                     | development only                                          | Lazy import behind `import.meta.env.DEV`; absent from the build.                                                       |
 
 The five states:
 
-| State | Condition | Presentation |
-| --- | --- | --- |
-| Idle | no query string | Form only; status region empty |
-| Loading | `isPending`, no data yet for this key | Status region "Searching for journeys"; decorative spinner hidden from assistive tech; results area keeps a reserved height; a cached search returning from history never shows this |
-| Results | success, rows > 0 | Table with a caption stating the search; status region announces "N journeys found" |
-| No results | success, rows = 0 | Status region "No journeys found for this search"; form stays filled |
-| Error | error | Alert region with the message and a "Try again" button calling `refetch`; focus moves to it |
+| State      | Condition                             | Presentation                                                                                                                                                                         |
+| ---------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Idle       | no query string                       | Form only; status region empty                                                                                                                                                       |
+| Loading    | `isPending`, no data yet for this key | Status region "Searching for journeys"; decorative spinner hidden from assistive tech; results area keeps a reserved height; a cached search returning from history never shows this |
+| Results    | success, rows > 0                     | Table with a caption stating the search; status region announces "N journeys found"                                                                                                  |
+| No results | success, rows = 0                     | Status region "No journeys found for this search"; form stays filled                                                                                                                 |
+| Error      | error                                 | Alert region with the message and a "Try again" button calling `refetch`; focus moves to it                                                                                          |
 
 A new key clears the old table. Rail sites replace results on a new search and keep them only when refining the same result set, which this page does not do, so `keepPreviousData` is not used. On narrow screens the results region is scrolled into view after submit, respecting `prefers-reduced-motion`. Optimistic updates do not apply: they are a mutation technique and a search is a read.
 
@@ -231,37 +231,37 @@ The results table stays a table at every width. Four short columns fit about 320
 
 Verified manually at 320, 375, 768, 1024 and 1440 px (dates recorded below) and by the Playwright mobile project.
 
-| Width | Checked on |
-| --- | --- |
+| Width                     | Checked on        |
+| ------------------------- | ----------------- |
 | 320, 375, 768, 1024, 1440 | _to be filled in_ |
 
 ## Accessibility
 
 Target: WCAG 2.2 level AA.
 
-| Item | WCAG 2.2 | Verified by |
-| --- | --- | --- |
-| Landmarks and structure: `<main>`, one `<h1>`, `<search>` around the form, table with `<caption>` and `<th scope="col">` | 1.3.1 | axe, manual |
-| Every control has a visible label, wired through `Field` | 1.3.1, 3.3.2, 4.1.2 | jsx-a11y lint, axe |
-| Errors identified and described: summary plus inline, `aria-invalid`, `aria-describedby`, instruction-style text | 3.3.1, 3.3.3 | component tests, axe |
-| Focus management: summary focused on each failed submit, error message focused on appearance, focus never lost on state change | 2.4.3, 2.4.7, 2.4.11 | component tests, manual keyboard |
-| Status messages via `role="status"` and `role="alert"`; polite updates never steal focus | 4.1.3 | component tests, manual screen reader |
-| Full keyboard operation, logical tab order, Enter submits, no traps | 2.1.1, 2.1.2, 2.4.3 | manual keyboard |
-| Visible focus indicator at 3:1 against adjacent colours | 2.4.7, 1.4.11 | tokens, manual |
-| Target size at least 24 × 24 CSS px for buttons and inputs | 2.5.8 | tokens, manual |
-| Text contrast 4.5:1; non-text 3:1 for borders and focus rings | 1.4.3, 1.4.11 | Lighthouse, contrast checker |
-| Reflow at 320 px with no horizontal scroll; usable at 200 % zoom | 1.4.10, 1.4.4 | manual |
-| `<html lang="en">` | 3.1.1 | lint |
-| Document title reflects the search | 2.4.2 | component test |
-| Decorative spinner `aria-hidden`; animation stopped under `prefers-reduced-motion` | 1.1.1, 2.3.3 (beyond AA) | CSS, manual |
-| Native controls only, so name, role and value come from the browser | 4.1.2 | by construction |
+| Item                                                                                                                           | WCAG 2.2                 | Verified by                           |
+| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------ | ------------------------------------- |
+| Landmarks and structure: `<main>`, one `<h1>`, `<search>` around the form, table with `<caption>` and `<th scope="col">`       | 1.3.1                    | axe, manual                           |
+| Every control has a visible label, wired through `Field`                                                                       | 1.3.1, 3.3.2, 4.1.2      | jsx-a11y lint, axe                    |
+| Errors identified and described: summary plus inline, `aria-invalid`, `aria-describedby`, instruction-style text               | 3.3.1, 3.3.3             | component tests, axe                  |
+| Focus management: summary focused on each failed submit, error message focused on appearance, focus never lost on state change | 2.4.3, 2.4.7, 2.4.11     | component tests, manual keyboard      |
+| Status messages via `role="status"` and `role="alert"`; polite updates never steal focus                                       | 4.1.3                    | component tests, manual screen reader |
+| Full keyboard operation, logical tab order, Enter submits, no traps                                                            | 2.1.1, 2.1.2, 2.4.3      | manual keyboard                       |
+| Visible focus indicator at 3:1 against adjacent colours                                                                        | 2.4.7, 1.4.11            | tokens, manual                        |
+| Target size at least 24 × 24 CSS px for buttons and inputs                                                                     | 2.5.8                    | tokens, manual                        |
+| Text contrast 4.5:1; non-text 3:1 for borders and focus rings                                                                  | 1.4.3, 1.4.11            | Lighthouse, contrast checker          |
+| Reflow at 320 px with no horizontal scroll; usable at 200 % zoom                                                               | 1.4.10, 1.4.4            | manual                                |
+| `<html lang="en">`                                                                                                             | 3.1.1                    | lint                                  |
+| Document title reflects the search                                                                                             | 2.4.2                    | component test                        |
+| Decorative spinner `aria-hidden`; animation stopped under `prefers-reduced-motion`                                             | 1.1.1, 2.3.3 (beyond AA) | CSS, manual                           |
+| Native controls only, so name, role and value come from the browser                                                            | 4.1.2                    | by construction                       |
 
 Tooling: `eslint-plugin-jsx-a11y` in lint; `vitest-axe` runs axe-core over every rendered state in the component tests; Lighthouse for contrast, which jsdom cannot measure. Automated tools find roughly 30 to 40 % of accessibility issues; the manual passes cover the rest.
 
-| Manual pass | Date | Notes |
-| --- | --- | --- |
-| Keyboard-only walkthrough of all states | _to be filled in_ | |
-| Screen reader walkthrough with NVDA on Windows | _to be filled in_ | |
+| Manual pass                                    | Date              | Notes |
+| ---------------------------------------------- | ----------------- | ----- |
+| Keyboard-only walkthrough of all states        | _to be filled in_ |       |
+| Screen reader walkthrough with NVDA on Windows | _to be filled in_ |       |
 
 Known limitation: the native date input's screen-reader announcements vary by browser. It is accessible in all major ones; the label and a format hint cover the gap.
 
@@ -280,14 +280,14 @@ The brief asks that no invalid or insecure request reaches the search API. The A
 
 ## Performance
 
-| Measure | Budget | How |
-| --- | --- | --- |
-| Initial JavaScript | under 100 KB gzipped (expected about 70: React and DOM about 45, TanStack Query about 13, app about 10) | `pnpm build` output and the size-check script |
-| Lighthouse performance | 95 or above, mobile and desktop | recorded in the README |
-| Layout shift on state change | 0 | reserved results height |
-| Input delay | none from React | uncontrolled inputs |
-| Font requests | 0 | system font stack |
-| Devtools in production | 0 bytes | lazy import behind `import.meta.env.DEV` |
+| Measure                      | Budget                                                                                                  | How                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Initial JavaScript           | under 100 KB gzipped (expected about 70: React and DOM about 45, TanStack Query about 13, app about 10) | `pnpm build` output and the size-check script |
+| Lighthouse performance       | 95 or above, mobile and desktop                                                                         | recorded in the README                        |
+| Layout shift on state change | 0                                                                                                       | reserved results height                       |
+| Input delay                  | none from React                                                                                         | uncontrolled inputs                           |
+| Font requests                | 0                                                                                                       | system font stack                             |
+| Devtools in production       | 0 bytes                                                                                                 | lazy import behind `import.meta.env.DEV`      |
 
 Formatters are created once per locale. Stale responses are never rendered. Vite's default modern browser target, no legacy plugin.
 
@@ -295,14 +295,14 @@ Deliberately not done, and when it would be: memoisation, when a profile shows w
 
 ## Testing
 
-| Layer | What is tested | Tool |
-| --- | --- | --- |
-| `model` | Validator rules and boundaries, including today is valid; URL codec round trip; `localDate` write and read paths under Europe/Amsterdam and America/New_York; duration maths; cents multiplication; formatters with fixed locales | Vitest |
-| `api` | Fixture builds 8 × 8 journeys; matching rules; case and whitespace folding; totals; sort order; frozen result; error trigger; invalid parameters rejected | Vitest |
-| hook | The five states; stale response never shown | Vitest, Testing Library |
-| components | Invalid submit shows the summary and focuses it; valid submit calls `onSearch`; URL on load renders each state; table text content | Testing Library, `user-event` |
-| accessibility | No axe violations in each state and in the form with errors | `vitest-axe` |
-| end to end | Empty form to results; invalid URL shows summary and never calls the API; origin `error` shows retry; the same three at 375 px | Playwright |
+| Layer         | What is tested                                                                                                                                                                                                                    | Tool                          |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `model`       | Validator rules and boundaries, including today is valid; URL codec round trip; `localDate` write and read paths under Europe/Amsterdam and America/New_York; duration maths; cents multiplication; formatters with fixed locales | Vitest                        |
+| `api`         | Fixture builds 8 × 8 journeys; matching rules; case and whitespace folding; totals; sort order; frozen result; error trigger; invalid parameters rejected                                                                         | Vitest                        |
+| hook          | The five states; stale response never shown                                                                                                                                                                                       | Vitest, Testing Library       |
+| components    | Invalid submit shows the summary and focuses it; valid submit calls `onSearch`; URL on load renders each state; table text content                                                                                                | Testing Library, `user-event` |
+| accessibility | No axe violations in each state and in the form with errors                                                                                                                                                                       | `vitest-axe`                  |
+| end to end    | Empty form to results; invalid URL shows summary and never calls the API; origin `error` shows retry; the same three at 375 px                                                                                                    | Playwright                    |
 
 Conventions: tests co-located as `*.test.ts(x)`; queries by role and label only, never test ids; interactions through `user-event`; no snapshots; `it.each` tables for rules; the mock injected through `ApiProvider` with `createSearchJourneys({ delayMs: 0, now })` rather than `vi.mock`; fake timers only where the delay itself is under test; coverage thresholds of 100 % on `model` and `api`, none on `ui`. Every bug found during development gets a failing test first.
 
@@ -322,20 +322,20 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 
 ## Dependencies
 
-| Package | Role | Motivation |
-| --- | --- | --- |
-| `react`, `react-dom` | runtime | Required by the brief |
-| `@tanstack/react-query` | runtime | Server state: stale-response safety, URL-keyed cache, declarative states |
-| `typescript`, `vite`, `@vitejs/plugin-react` | dev | Strict types; the standard client-only React build |
-| `vitest`, `jsdom` | dev | Test runner native to Vite |
-| `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom` | dev | Tests through roles and labels; realistic interactions; readable DOM matchers |
-| `vitest-axe` | dev | axe-core in every component test |
-| `@playwright/test` | dev | Three real-browser tests and a mobile viewport |
-| `eslint` (with `@eslint/js`), `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, `@tanstack/eslint-plugin-query`, `eslint-config-prettier` | dev | Type-aware lint, hook rules, static accessibility, query-key correctness, no conflicts with Prettier |
-| `prettier` | dev | Formatting without debate |
-| `lint-staged`, `simple-git-hooks` | dev | Pre-commit formatting and lint on staged files |
-| `knip` | dev | Finds unused files, exports and dependencies |
-| `@tanstack/react-query-devtools` | dev | Visible cache in development only |
+| Package                                                                                                                                                             | Role    | Motivation                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| `react`, `react-dom`                                                                                                                                                | runtime | Required by the brief                                                                                |
+| `@tanstack/react-query`                                                                                                                                             | runtime | Server state: stale-response safety, URL-keyed cache, declarative states                             |
+| `typescript`, `vite`, `@vitejs/plugin-react`                                                                                                                        | dev     | Strict types; the standard client-only React build                                                   |
+| `vitest`, `jsdom`                                                                                                                                                   | dev     | Test runner native to Vite                                                                           |
+| `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`                                                                                | dev     | Tests through roles and labels; realistic interactions; readable DOM matchers                        |
+| `vitest-axe`                                                                                                                                                        | dev     | axe-core in every component test                                                                     |
+| `@playwright/test`                                                                                                                                                  | dev     | Three real-browser tests and a mobile viewport                                                       |
+| `eslint` (with `@eslint/js`), `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, `@tanstack/eslint-plugin-query`, `eslint-config-prettier` | dev     | Type-aware lint, hook rules, static accessibility, query-key correctness, no conflicts with Prettier |
+| `prettier`                                                                                                                                                          | dev     | Formatting without debate                                                                            |
+| `lint-staged`, `simple-git-hooks`                                                                                                                                   | dev     | Pre-commit formatting and lint on staged files                                                       |
+| `knip`                                                                                                                                                              | dev     | Finds unused files, exports and dependencies                                                         |
+| `@tanstack/react-query-devtools`                                                                                                                                    | dev     | Visible cache in development only                                                                    |
 
 ## Considered and not adopted
 
