@@ -314,7 +314,7 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 - ESLint flat config: `typescript-eslint` `strictTypeChecked` and `stylisticTypeChecked` with `projectService`; `react-hooks`; `jsx-a11y` strict; `@tanstack/eslint-plugin-query`; `eslint-config-prettier` last; the import rules above as `no-restricted-imports` overrides.
 - Prettier with a near-empty configuration; formats CSS as well, so no Stylelint.
 - `.editorconfig`; `.vscode/extensions.json` and `settings.json` for format and fix on save.
-- `simple-git-hooks` running `lint-staged` at pre-commit.
+- `simple-git-hooks` running `lint-staged` at pre-commit and `commitlint` at commit-msg, installed by the `prepare` script.
 - A size-check script that gzips the built JavaScript and fails above 100 KB.
 - `knip` in CI with zero findings required.
 - StrictMode on in development, which double-invokes effects and proves the hooks are idempotent.
@@ -334,6 +334,7 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 | `eslint` (with `@eslint/js`), `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, `@tanstack/eslint-plugin-query`, `eslint-config-prettier` | dev     | Type-aware lint, hook rules, static accessibility, query-key correctness, no conflicts with Prettier |
 | `prettier`                                                                                                                                                          | dev     | Formatting without debate                                                                            |
 | `lint-staged`, `simple-git-hooks`                                                                                                                                   | dev     | Pre-commit formatting and lint on staged files                                                       |
+| `@commitlint/cli`, `@commitlint/config-conventional`                                                                                                                | dev     | Rejects commit messages that are not Conventional Commits, so the history reads as documentation     |
 | `knip`                                                                                                                                                              | dev     | Finds unused files, exports and dependencies                                                         |
 | `@tanstack/react-query-devtools`                                                                                                                                    | dev     | Visible cache in development only                                                                    |
 

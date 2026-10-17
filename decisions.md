@@ -93,3 +93,9 @@ A final pass over the whole design. Adopted: form defaults (passengers 1, date t
 ## 17 · Stretch: polish (17 Oct 2026, gated)
 
 A swap button between origin and destination, and dark mode through a `prefers-color-scheme` block over the tokens.
+
+## 18 · Commit message linting (17 Oct 2026)
+
+**Decided:** `commitlint` with `config-conventional` at the commit-msg hook, through the same `simple-git-hooks`. Header at most 72 characters; scope optional but, when given, one of `api`, `model`, `ui`, `shared`, `app`, `ci`, `deps`, `docs`. The package's own install script is left disabled under pnpm 10; the `prepare` script installs the hooks explicitly instead.
+
+**Options considered:** Husky (a second hook manager for the same job). A hand-written regex script (zero dependencies, but unmaintained rules and worse error messages). A CI step over the commit range (one committer, and the hook already covers it).
