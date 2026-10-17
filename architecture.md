@@ -331,7 +331,7 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 | `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom` | dev | Tests through roles and labels; realistic interactions; readable DOM matchers |
 | `vitest-axe` | dev | axe-core in every component test |
 | `@playwright/test` | dev | Three real-browser tests and a mobile viewport |
-| `eslint`, `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, `@tanstack/eslint-plugin-query`, `eslint-config-prettier` | dev | Type-aware lint, hook rules, static accessibility, query-key correctness, no conflicts with Prettier |
+| `eslint` (with `@eslint/js`), `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, `@tanstack/eslint-plugin-query`, `eslint-config-prettier` | dev | Type-aware lint, hook rules, static accessibility, query-key correctness, no conflicts with Prettier |
 | `prettier` | dev | Formatting without debate |
 | `lint-staged`, `simple-git-hooks` | dev | Pre-commit formatting and lint on staged files |
 | `knip` | dev | Finds unused files, exports and dependencies |
