@@ -30,7 +30,7 @@ pnpm install
 | `pnpm typecheck`                    | `tsc --noEmit` (Vite does not typecheck during build)                                         |
 | `pnpm knip`                         | Reports unused files, exports and dependencies; must be empty                                 |
 
-A pre-commit hook runs Prettier and ESLint on staged files.
+A pre-commit hook runs Prettier and ESLint on staged files, and a commit-msg hook checks the message against Conventional Commits. The hooks are written into `.git/hooks` by `simple-git-hooks` through the `prepare` script, so `pnpm install` sets them up; run `pnpm hooks:install` if they are ever missing.
 
 ## Time zones
 
