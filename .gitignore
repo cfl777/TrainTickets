@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+coverage/
+
+# test artefacts
+playwright-report/
+test-results/
+
+# environment (none expected; kept for safety)
+.env
+.env.*
+!.env.example
+
+# editor and OS
+.idea/
+.DS_Store
+Thumbs.db
+*.log
