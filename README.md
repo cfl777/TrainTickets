@@ -14,12 +14,12 @@ Everything else, including how to reach each state of the page, is in [run.md](r
 
 ## Documents
 
-| File | What it holds |
-| --- | --- |
-| [run.md](run.md) | Prerequisites, every script, how to see each state, troubleshooting |
+| File                               | What it holds                                                                                                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run.md](run.md)                   | Prerequisites, every script, how to see each state, troubleshooting                                                                                           |
 | [architecture.md](architecture.md) | Layers, URL contract, data flow, mock API, validation, fetching, formatting, components, accessibility, security, performance, testing, tooling, dependencies |
-| [assumptions.md](assumptions.md) | Every place the brief was ambiguous, and what was decided |
-| [decisions.md](decisions.md) | The architecture decision log: options considered and why each was chosen or declined |
+| [assumptions.md](assumptions.md)   | Every place the brief was ambiguous, and what was decided                                                                                                     |
+| [decisions.md](decisions.md)       | The architecture decision log: options considered and why each was chosen or declined                                                                         |
 
 ## How to review this repository
 
@@ -42,11 +42,11 @@ Hosted preview: _to be added after the first deploy_.
 
 Measured on _date to be filled in_ with `pnpm build` and Lighthouse (mobile and desktop presets).
 
-| Measure | Budget | Measured |
-| --- | --- | --- |
-| Initial JavaScript, gzipped | under 100 KB | _tbd_ |
-| Lighthouse performance | 95 or above | _tbd_ |
-| Lighthouse accessibility | 100 | _tbd_ |
+| Measure                     | Budget       | Measured |
+| --------------------------- | ------------ | -------- |
+| Initial JavaScript, gzipped | under 100 KB | _tbd_    |
+| Lighthouse performance      | 95 or above  | _tbd_    |
+| Lighthouse accessibility    | 100          | _tbd_    |
 
 ## Dependencies
 

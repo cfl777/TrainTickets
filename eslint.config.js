@@ -1,10 +1,10 @@
-import js from '@eslint/js'
-import pluginQuery from '@tanstack/eslint-plugin-query'
-import prettier from 'eslint-config-prettier'
-import jsxA11y from 'eslint-plugin-jsx-a11y'
-import reactHooks from 'eslint-plugin-react-hooks'
-import { defineConfig, globalIgnores } from 'eslint/config'
-import tseslint from 'typescript-eslint'
+import js from "@eslint/js";
+import pluginQuery from "@tanstack/eslint-plugin-query";
+import prettier from "eslint-config-prettier";
+import jsxA11y from "eslint-plugin-jsx-a11y";
+import reactHooks from "eslint-plugin-react-hooks";
+import { defineConfig, globalIgnores } from "eslint/config";
+import tseslint from "typescript-eslint";
 
 /**
  * ESLint configuration. Goals, in order of importance:
@@ -24,17 +24,17 @@ import tseslint from 'typescript-eslint'
  *   owns layout.
  */
 export default defineConfig([
-  globalIgnores(['dist', 'coverage', 'playwright-report', 'test-results']),
+  globalIgnores(["dist", "coverage", "playwright-report", "test-results"]),
 
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ["**/*.{ts,tsx}"],
     extends: [
       js.configs.recommended,
       tseslint.configs.strictTypeChecked,
       tseslint.configs.stylisticTypeChecked,
       reactHooks.configs.flat.recommended,
       jsxA11y.flatConfigs.strict,
-      pluginQuery.configs['flat/recommended'],
+      pluginQuery.configs["flat/recommended"],
     ],
     languageOptions: {
       parserOptions: {
@@ -46,57 +46,60 @@ export default defineConfig([
 
   // Import boundaries: ui -> model -> api, one way.
   {
-    files: ['src/features/*/api/**'],
+    files: ["src/features/*/api/**"],
     rules: {
-      'no-restricted-imports': [
-        'error',
+      "no-restricted-imports": [
+        "error",
         {
-          paths: ['react', 'react-dom'],
-          patterns: ['**/model/**', '**/ui/**'],
+          paths: ["react", "react-dom"],
+          patterns: ["**/model/**", "**/ui/**"],
         },
       ],
     },
   },
   {
-    files: ['src/features/*/model/**'],
-    ignores: ['src/features/*/model/use*.ts', 'src/features/*/model/*.test.tsx'],
+    files: ["src/features/*/model/**"],
+    ignores: [
+      "src/features/*/model/use*.ts",
+      "src/features/*/model/*.test.tsx",
+    ],
     rules: {
-      'no-restricted-imports': [
-        'error',
+      "no-restricted-imports": [
+        "error",
         {
-          paths: ['react', 'react-dom', '@tanstack/react-query'],
-          patterns: ['**/ui/**'],
+          paths: ["react", "react-dom", "@tanstack/react-query"],
+          patterns: ["**/ui/**"],
         },
       ],
     },
   },
   {
-    files: ['src/features/*/model/use*.ts'],
+    files: ["src/features/*/model/use*.ts"],
     rules: {
-      'no-restricted-imports': ['error', { patterns: ['**/ui/**'] }],
+      "no-restricted-imports": ["error", { patterns: ["**/ui/**"] }],
     },
   },
   {
-    files: ['src/features/*/ui/**'],
+    files: ["src/features/*/ui/**"],
     rules: {
-      'no-restricted-imports': [
-        'error',
-        { paths: ['@tanstack/react-query'], patterns: ['**/api/**'] },
+      "no-restricted-imports": [
+        "error",
+        { paths: ["@tanstack/react-query"], patterns: ["**/api/**"] },
       ],
     },
   },
   {
-    files: ['src/shared/**'],
+    files: ["src/shared/**"],
     rules: {
-      'no-restricted-imports': ['error', { patterns: ['**/features/**'] }],
+      "no-restricted-imports": ["error", { patterns: ["**/features/**"] }],
     },
   },
   {
-    files: ['src/app/**', 'src/main.tsx'],
+    files: ["src/app/**", "src/main.tsx"],
     rules: {
-      'no-restricted-imports': ['error', { patterns: ['**/features/*/*'] }],
+      "no-restricted-imports": ["error", { patterns: ["**/features/*/*"] }],
     },
   },
 
   prettier,
-])
+]);
