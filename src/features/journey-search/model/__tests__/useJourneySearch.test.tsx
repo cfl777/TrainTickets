@@ -113,6 +113,34 @@ describe("useJourneySearch", () => {
     });
   });
 
+  it("is loading again while a retry is in flight", async () => {
+    let calls = 0;
+    let releaseRetry: () => void = () => undefined;
+    const api = (): Promise<Journeys> => {
+      calls += 1;
+      return calls === 1
+        ? Promise.reject(new Error("first attempt fails"))
+        : new Promise<Journeys>((resolve) => {
+            releaseRetry = () => {
+              resolve([]);
+            };
+          });
+    };
+    const { result } = setup(valid, api);
+    const failed = await settled(result);
+    expect(failed.kind).toBe("error");
+    if (failed.kind !== "error") return;
+
+    failed.retry();
+    await waitFor(() => {
+      expect(result.current.kind).toBe("loading");
+    });
+
+    releaseRetry();
+    const retried = await settled(result);
+    expect(retried.kind).toBe("success");
+  });
+
   it("never shows a response for a superseded search", async () => {
     let releaseFirst: (journeys: Journeys) => void = () => undefined;
     const real = createSearchJourneys({ delayMs: 0, now });

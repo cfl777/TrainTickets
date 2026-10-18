@@ -116,7 +116,9 @@ export function useJourneySearch(
   }
   const { raw } = resolved;
 
-  if (query.isError) {
+  // A retry keeps the error data while it refetches; show the loading state
+  // instead, so the status region says "Searching" again.
+  if (query.isError && !query.isFetching) {
     return {
       kind: "error",
       raw,
