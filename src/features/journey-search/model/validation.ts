@@ -24,7 +24,9 @@ import type { ValidJourneyParameters } from "./types.ts";
 
 type JourneyField = "origin" | "destination" | "date" | "passengers";
 
-type RawJourneyParameters = Readonly<Record<JourneyField, string | null>>;
+export type RawJourneyParameters = Readonly<
+  Record<JourneyField, string | null>
+>;
 
 type ValidationErrors = Readonly<Partial<Record<JourneyField, string>>>;
 
