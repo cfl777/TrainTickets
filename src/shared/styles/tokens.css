@@ -11,8 +11,13 @@
  *   so an example never reads as an entered value.
  * - Breakpoints: 640 px and 960 px. Custom properties cannot be used in
  *   media queries, so the two values are repeated literally where used.
+ * - Dark mode is the same token names redefined under prefers-color-scheme,
+ *   each pair re-checked for contrast; components never know which mode
+ *   they are in. color-scheme lets native controls (the date picker) follow.
  */
 :root {
+  color-scheme: light;
+
   --color-text: #1b1b1b;
   --color-text-muted: #4a4a4a;
   --color-placeholder: #767676;
@@ -42,4 +47,25 @@
   --focus-ring: 3px solid var(--color-focus);
   --focus-offset: 2px;
   --page-max-width: 60rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-text: #ededed;
+    --color-text-muted: #b5b5b5;
+    --color-background: #141614;
+    --color-card: #1e211e;
+    --color-surface: #262a26;
+    --color-line: #3a403a;
+    --color-border: #8f948f;
+    --color-accent: #5dcaa5;
+    --color-accent-deep: #9fe1cb;
+    --color-accent-soft: #1d9e75;
+    --color-accent-tint: #0f3d31;
+    --color-on-accent: #04342c;
+    --color-error: #ff9b9b;
+    --color-focus: #5dcaa5;
+  }
 }

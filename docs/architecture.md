@@ -221,7 +221,7 @@ App
 - `Field` generates ids and sets `aria-describedby` and `aria-invalid` once, not four times; it takes an optional decorative icon.
 - `JourneyTable` contains no `Intl` call and no arithmetic. Four columns: Departure, Arrival, Duration, "Total for N passengers". Origin, destination and date are in the visible caption. Row ids come from the view model (composite of departure, arrival and price plus index).
 - No component library: every control is native. Headless libraries earn their place on dialogs, menus, comboboxes and custom date pickers; this page has none. React Aria Components is the route if a combobox or date picker is ever needed.
-- CSS Modules with modern CSS; tokens as custom properties in `shared/styles/tokens.css`; no runtime styling. The look is a "ticket": an off-white page, the form as a white card with a teal edge, result rows as spaced white cards that remain table rows, prices in a tinted pill. Depth comes from tone, never shadows.
+- CSS Modules with modern CSS; tokens as custom properties in `shared/styles/tokens.css`; no runtime styling. The look is a "ticket": an off-white page, the form as a white card with a teal edge, result rows as spaced white cards that remain table rows, prices in a tinted pill. Depth comes from tone, never shadows. Dark mode redefines the same tokens under `prefers-color-scheme: dark`; no component knows which mode it is in.
 
 ## Responsive
 
