@@ -1,6 +1,6 @@
 # Train Journeys
 
-A single-page React application for searching train journeys. The user enters an origin, a destination, a travel date and a number of passengers; the page writes that search to the URL, calls a mock `searchJourneys` API, and shows the matching journeys with departure and arrival times, duration and price formatted for the browser's locale. Built for the Sqills S3 Passenger frontend assignment, where architectural choices count for more than feature count.
+A single-page React application for searching train journeys. The user enters an origin, a destination, a travel date and a number of passengers; the page writes that search to the URL, calls a mock `searchJourneys` API, and shows the matching journeys with departure and arrival times, duration and price formatted for the browser's locale. Built as a frontend programming assignment, where architectural choices count for more than feature count.
 
 ## Quick start
 
