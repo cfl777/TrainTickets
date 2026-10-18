@@ -47,7 +47,15 @@ export default defineConfig([
         "error",
         { allowInterfaces: "with-single-extends" },
       ],
+      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
     },
+  },
+
+  {
+    // Declaration files merge into existing interfaces (declaration
+    // merging), which only works with `interface`.
+    files: ["**/*.d.ts"],
+    rules: { "@typescript-eslint/consistent-type-definitions": "off" },
   },
 
   // Import boundaries: ui -> model -> api, one way.
