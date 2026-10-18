@@ -36,7 +36,7 @@ Tests sit in a `__tests__` folder beside the files they cover. The pure modules 
 
 ## Try it without installing
 
-Hosted preview: https://train-journeys.vercel.app. Production tracks `main`; at the time of writing it reflects commit `1a66b5e`. Every pull request gets its own preview deployment, reported as a GitHub check. Added for quick initial checks without starting the project; the local route above stays the reference.
+Hosted preview: https://train-journeys.vercel.app. Only `main` is deployed; at the time of writing the site reflects commit `1a66b5e`. Added for quick initial checks without starting the project; the local route above stays the reference.
 
 ## Build numbers
 
