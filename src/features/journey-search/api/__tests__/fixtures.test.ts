@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildJourneys } from "./fixtures.ts";
-import { timetable } from "./timetable.ts";
+import { buildJourneys } from "../fixtures.ts";
+import { timetable } from "../timetable.ts";
 
 const tuesday = new Date(2026, 9, 20, 15, 30);
 

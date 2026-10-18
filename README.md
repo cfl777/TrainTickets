@@ -32,7 +32,7 @@ Read the code in this order. Each file is small and the next one builds on it.
 5. `src/features/journey-search/model/useJourneySearch.ts` — parse, validate, query, build rows; returns one discriminated union.
 6. `src/features/journey-search/ui/SearchPage.tsx` — composition only.
 
-Tests sit next to the file they cover. The pure modules in `model`, `api` and `shared/lib` have 100 % coverage thresholds.
+Tests sit in a `__tests__` folder beside the files they cover. The pure modules in `model`, `api` and `shared/lib` have 100 % coverage thresholds.
 
 ## Try it without installing
 

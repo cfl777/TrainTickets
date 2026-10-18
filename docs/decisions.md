@@ -68,7 +68,7 @@ Nine ambiguities were resolved before anything else, because the API, validation
 
 ## 12 · Testing strategy (17 Oct 2026)
 
-**Decided:** Vitest with Testing Library, `user-event` and `vitest-axe`. The mock is injected through a small `ApiProvider` rather than `vi.mock`. The date suite runs in two time zones through a CI matrix. Tests are co-located, query by role and label only, use no snapshots, and use `it.each` tables for rules. Coverage thresholds of 100 % on `model` and `api`, none on `ui`. Playwright for three end-to-end tests with a mobile viewport project, in a separate CI job. Every bug found gets a failing test first.
+**Decided:** Vitest with Testing Library, `user-event` and `vitest-axe`. The mock is injected through a small `ApiProvider` rather than `vi.mock`. The date suite runs in two time zones through a CI matrix. Tests sit in a `__tests__` folder beside the code they cover, query by role and label only, use no snapshots, and use `it.each` tables for rules. Coverage thresholds of 100 % on `model` and `api`, none on `ui`. Playwright for three end-to-end tests with a mobile viewport project, in a separate CI job. Every bug found gets a failing test first.
 
 **Options considered:** `vi.mock` for the API (invisible magic coupled to file paths). No Playwright (shorter install; declined because it is the only layer that runs the real date input, real `Intl`, real focus and real viewports).
 

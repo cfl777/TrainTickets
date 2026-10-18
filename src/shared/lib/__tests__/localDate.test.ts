@@ -4,7 +4,7 @@ import {
   isSameLocalDay,
   parseLocalDate,
   startOfLocalDay,
-} from "./localDate.ts";
+} from "../localDate.ts";
 
 function parseOrFail(value: string): Date {
   const date = parseLocalDate(value);
