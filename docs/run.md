@@ -11,7 +11,7 @@ No environment variables, no secrets, no services. The search API is a local fun
 
 ## Hosted preview
 
-Nothing below needs it, but `main` is also deployed to https://train-journeys.vercel.app by Vercel on every merge, with the same `pnpm build`. The addresses in "Seeing each state of the page" work there too: replace `http://localhost:5173` with that host. Pull requests get a preview deployment of their own, linked from the pull request's checks; those previews require a Vercel login, production does not.
+Nothing below needs it, but `main` is also deployed to https://train-journeys.vercel.app by Vercel on every merge, with the same `pnpm build`. The addresses in "Seeing each state of the page" work there too: replace `http://localhost:5173` with that host. Only `main` is deployed; branches and pull requests are built by CI, not by Vercel.
 
 ## Install
 
