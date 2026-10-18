@@ -12,17 +12,19 @@ export const validationMessages = {
   passengers: "Choose between 1 and 10 passengers",
 } as const;
 
-/** Labels, hints and copy of the search form. */
+/** Labels, placeholders and copy of the search form. */
 export const formStrings = {
-  origin: { label: "Origin", hint: "Station name, for example Enschede" },
-  destination: {
-    label: "Destination",
-    hint: "Station name, for example Hengelo",
-  },
-  date: { label: "Travel date", hint: "Today or later" },
-  passengers: { label: "Passengers", hint: "1 to 10" },
+  origin: { label: "Origin", placeholder: "Enschede" },
+  destination: { label: "Destination", placeholder: "Hengelo" },
+  date: { label: "Travel date" },
+  passengers: { label: "Passengers" },
   submit: "Search journeys",
-  summaryHeading: "There is a problem",
+  stationsNote: "The demo timetable serves Enschede, Hengelo and Almelo.",
+  /** Read by screen readers after a failed submit; the messages themselves sit under the fields. */
+  errorsAnnouncement: (count: number): string =>
+    count === 1
+      ? "1 field needs attention"
+      : `${String(count)} fields need attention`,
 } as const;
 
 /** Caption of the results table: the search in words, with the date already formatted. */

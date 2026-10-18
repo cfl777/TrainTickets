@@ -26,15 +26,20 @@ test("searches from an empty form to a results table", async ({ page }) => {
   await expect(page).toHaveTitle("Enschede to Hengelo | Train journeys");
 });
 
-test("shows the error summary for an invalid URL and does not search", async ({
+test("shows the field error for an invalid URL and does not search", async ({
   page,
 }) => {
   await page.goto(
     "/?origin=Enschede&destination=Hengelo&date=2025-04-20&passengers=2",
   );
-  const summary = page.getByRole("alert");
-  await expect(summary).toBeVisible();
-  await expect(summary).toContainText("Choose a date from today onwards");
+  await expect(
+    page.getByText("Choose a date from today onwards"),
+  ).toBeVisible();
+  await expect(page.getByLabel("Travel date")).toBeFocused();
+  await expect(page.getByLabel("Travel date")).toHaveAttribute(
+    "aria-invalid",
+    "true",
+  );
   await expect(page.getByLabel("Origin")).toHaveValue("Enschede");
   await expect(page.getByRole("status")).toHaveText("");
   await expect(page.getByRole("table")).toHaveCount(0);

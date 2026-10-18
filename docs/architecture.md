@@ -10,18 +10,18 @@ One page. The URL query string is the only state. Submitting the form does not s
 form submit ──► validate ──► setSearch(params) ──► history.pushState + event
                    │ invalid                                   │
                    ▼                                           ▼
-            error summary                      useSearchParams re-renders SearchPage
+            field errors                       useSearchParams re-renders SearchPage
             (API not called)                                   │
                                                                ▼
                                            parseSearchParams ──► validate ──► useJourneySearch
                                                                      │ invalid         │ enabled
                                                                      ▼                 ▼
-                                                              error summary        loading → results / no results / error
+                                                              field errors         loading → results / no results / error
 
 direct open or Back/Forward ──► popstate ──► same path from "useSearchParams re-renders"
 ```
 
-Five visible states: idle (no query string), loading, results, no results, error. A sixth, invalid, shows the validation summary with the form pre-filled from the URL and never calls the API.
+Five visible states: idle (no query string), loading, results, no results, error. A sixth, invalid, shows the validation messages under the fields with the form pre-filled from the URL and never calls the API.
 
 ## URL contract
 
@@ -87,7 +87,6 @@ src/
       ui/                           presentational components + the page
         SearchPage.tsx              composition only
         SearchForm.tsx (+ .module.css)
-        ErrorSummary.tsx (+ .module.css)
         SearchResults.tsx
         StatusMessage.tsx (+ .module.css)
         ErrorMessage.tsx
@@ -148,18 +147,18 @@ The form:
 
 - `<form action={fn}>` with `useActionState`. The action validates and either returns the errors as state or calls `onSearch` with the valid parameters. The form is keyed on the URL search string so React's reset after a successful action lands on fresh defaults from the URL; this also pre-fills a shared link.
 - Uncontrolled inputs, read from `FormData` in the action. Typing never re-renders the page.
-- `noValidate` on the form. Native `required`, `min` and `max` stay for semantics and mobile keyboards, but browser bubbles are off so the summary below is the only feedback.
+- `noValidate` on the form. Native `required`, `min` and `max` stay for semantics and mobile keyboards, but browser bubbles are off so our messages are the only feedback.
 - The submit button is always enabled. "Can only be submitted if valid" is met by preventing submission, not by disabling the control, which would hide the reason from keyboard and screen-reader users.
 - Passengers: `<input type="number" min="1" max="10" step="1" inputmode="numeric">`, the native `spinbutton` that rail sites' plus/minus steppers reimplement. Defaults to 1.
 - Date: `<input type="date" min={today}>`. Defaults to tomorrow (assumption 7).
-- Station fields: `autocapitalize="words"`, `spellcheck="false"`; the last field has `enterkeyhint="search"`.
+- Station fields: `autocapitalize="words"`, `spellcheck="false"`, a station name as placeholder; the last field has `enterkeyhint="search"`. Each control carries a decorative inline icon, hidden from assistive tech; the label carries the meaning. One line under the form names the three stations the demo timetable serves.
 
 Validation feedback, following the GOV.UK and NL Design System form patterns:
 
-- On submit, all fields are checked at once. If any fail, an error summary renders at the top with `role="alert"`, a heading and one link per error that focuses its field; focus moves to the summary; each message also appears inline with its field, between the hint and the control as in the GOV.UK pattern, with `aria-describedby` and `aria-invalid="true"`.
+- On submit, all fields are checked at once. If any fail, each message appears directly under its field with `aria-describedby` and `aria-invalid="true"`, focus moves to the first invalid field, and a visually hidden `role="alert"` says how many fields need attention, so a screen-reader user learns what a sighted user sees (decision 22).
 - After the first failed submit, each errored field re-validates on change and clears its own message once valid. Before the first submit nothing nags.
 - No success ticks on valid fields. Success is the search starting.
-- When the page loads with an invalid URL, the same summary shows with the form pre-filled; action-state errors take precedence over URL errors when both exist.
+- When the page loads with an invalid URL, the same messages show with the form pre-filled and the first invalid field focused; action-state errors take precedence over URL errors when both exist.
 
 ## Data fetching
 
@@ -207,7 +206,7 @@ App
    └─ SearchPage              composition only; useSearchParams + useJourneySearch
       ├─ <search>             HTML landmark
       │  └─ SearchForm        useActionState; props: defaultValues, initialErrors, onSearch
-      │     ├─ ErrorSummary   role="alert"; focuses on every attempt
+      │     ├─ (hidden alert)  "N fields need attention" after a failed submit
       │     └─ Field × 4      shared/ui; label + control + hint + error wiring
       └─ SearchResults        props: the union; aria-busy while loading
          ├─ StatusMessage     role="status", always mounted
@@ -217,12 +216,12 @@ App
 
 - `SearchPage` is a layout. The hook does the work.
 - `SearchForm` never pushes history; it reports valid parameters through `onSearch`. Its tests need no URL.
-- `ErrorSummary` focuses on every failed attempt, keyed on an attempt counter from the action state, including repeat failures with identical errors.
+- After a failed submit the first invalid field is focused, keyed on an attempt counter from the action state, so a repeat failure with identical errors refocuses too.
 - Two live regions: polite status for loading, counts and no results; alert for errors. Switching `role` on a mounted element is unreliable across screen readers.
-- `Field` generates ids and sets `aria-describedby` and `aria-invalid` once, not four times.
+- `Field` generates ids and sets `aria-describedby` and `aria-invalid` once, not four times; it takes an optional decorative icon.
 - `JourneyTable` contains no `Intl` call and no arithmetic. Four columns: Departure, Arrival, Duration, "Total for N passengers". Origin, destination and date are in the visible caption. Row ids come from the view model (composite of departure, arrival and price plus index).
 - No component library: every control is native. Headless libraries earn their place on dialogs, menus, comboboxes and custom date pickers; this page has none. React Aria Components is the route if a combobox or date picker is ever needed.
-- CSS Modules with modern CSS; tokens as custom properties in `shared/styles/tokens.css`; no runtime styling.
+- CSS Modules with modern CSS; tokens as custom properties in `shared/styles/tokens.css`; no runtime styling. The look is a "ticket": an off-white page, the form as a white card with a teal edge, result rows as spaced white cards that remain table rows, prices in a tinted pill. Depth comes from tone, never shadows.
 
 ## Responsive
 
@@ -240,22 +239,22 @@ Verified manually at 320, 375, 768, 1024 and 1440 px (dates recorded below) and 
 
 Target: WCAG 2.2 level AA.
 
-| Item                                                                                                                           | WCAG 2.2                 | Verified by                           |
-| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------ | ------------------------------------- |
-| Landmarks and structure: `<main>`, one `<h1>`, `<search>` around the form, table with `<caption>` and `<th scope="col">`       | 1.3.1                    | axe, manual                           |
-| Every control has a visible label, wired through `Field`                                                                       | 1.3.1, 3.3.2, 4.1.2      | jsx-a11y lint, axe                    |
-| Errors identified and described: summary plus inline, `aria-invalid`, `aria-describedby`, instruction-style text               | 3.3.1, 3.3.3             | component tests, axe                  |
-| Focus management: summary focused on each failed submit, error message focused on appearance, focus never lost on state change | 2.4.3, 2.4.7, 2.4.11     | component tests, manual keyboard      |
-| Status messages via `role="status"` and `role="alert"`; polite updates never steal focus                                       | 4.1.3                    | component tests, manual screen reader |
-| Full keyboard operation, logical tab order, Enter submits, no traps                                                            | 2.1.1, 2.1.2, 2.4.3      | manual keyboard                       |
-| Visible focus indicator at 3:1 against adjacent colours                                                                        | 2.4.7, 1.4.11            | tokens, manual                        |
-| Target size at least 24 × 24 CSS px for buttons and inputs                                                                     | 2.5.8                    | tokens, manual                        |
-| Text contrast 4.5:1; non-text 3:1 for borders and focus rings                                                                  | 1.4.3, 1.4.11            | Lighthouse, contrast checker          |
-| Reflow at 320 px with no horizontal scroll; usable at 200 % zoom                                                               | 1.4.10, 1.4.4            | manual                                |
-| `<html lang="en">`                                                                                                             | 3.1.1                    | lint                                  |
-| Document title reflects the search                                                                                             | 2.4.2                    | component test                        |
-| Decorative spinner `aria-hidden`; animation stopped under `prefers-reduced-motion`                                             | 1.1.1, 2.3.3 (beyond AA) | CSS, manual                           |
-| Native controls only, so name, role and value come from the browser                                                            | 4.1.2                    | by construction                       |
+| Item                                                                                                                                       | WCAG 2.2                 | Verified by                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ | ------------------------------------- |
+| Landmarks and structure: `<main>`, one `<h1>`, `<search>` around the form, table with `<caption>` and `<th scope="col">`                   | 1.3.1                    | axe, manual                           |
+| Every control has a visible label, wired through `Field`                                                                                   | 1.3.1, 3.3.2, 4.1.2      | jsx-a11y lint, axe                    |
+| Errors identified and described: under each field with, `aria-invalid`, `aria-describedby`, instruction-style text                         | 3.3.1, 3.3.3             | component tests, axe                  |
+| Focus management: first invalid field focused on each failed submit, error message focused on appearance, focus never lost on state change | 2.4.3, 2.4.7, 2.4.11     | component tests, manual keyboard      |
+| Status messages via `role="status"` and `role="alert"`; polite updates never steal focus                                                   | 4.1.3                    | component tests, manual screen reader |
+| Full keyboard operation, logical tab order, Enter submits, no traps                                                                        | 2.1.1, 2.1.2, 2.4.3      | manual keyboard                       |
+| Visible focus indicator at 3:1 against adjacent colours                                                                                    | 2.4.7, 1.4.11            | tokens, manual                        |
+| Target size at least 24 × 24 CSS px for buttons and inputs                                                                                 | 2.5.8                    | tokens, manual                        |
+| Text contrast 4.5:1; non-text 3:1 for borders and focus rings                                                                              | 1.4.3, 1.4.11            | Lighthouse, contrast checker          |
+| Reflow at 320 px with no horizontal scroll; usable at 200 % zoom                                                                           | 1.4.10, 1.4.4            | manual                                |
+| `<html lang="en">`                                                                                                                         | 3.1.1                    | lint                                  |
+| Document title reflects the search                                                                                                         | 2.4.2                    | component test                        |
+| Decorative spinner `aria-hidden`; animation stopped under `prefers-reduced-motion`                                                         | 1.1.1, 2.3.3 (beyond AA) | CSS, manual                           |
+| Native controls only, so name, role and value come from the browser                                                                        | 4.1.2                    | by construction                       |
 
 Tooling: `eslint-plugin-jsx-a11y` in lint; `vitest-axe` runs axe-core over every rendered state in the component tests; Lighthouse for contrast, which jsdom cannot measure. Automated tools find roughly 30 to 40 % of accessibility issues; the manual passes cover the rest.
 
@@ -301,9 +300,9 @@ Deliberately not done, and when it would be: memoisation, when a profile shows w
 | `model`       | Validator rules and boundaries, including today is valid; URL codec round trip; `localDate` write and read paths under Europe/Amsterdam and America/New_York; duration maths; formatters with fixed locales | Vitest                        |
 | `api`         | Fixture builds 8 × 8 journeys; matching rules; case and whitespace folding; totals in whole cents; sort order; frozen result; error trigger; invalid parameters rejected                                    | Vitest                        |
 | hook          | The five states; stale response never shown                                                                                                                                                                 | Vitest, Testing Library       |
-| components    | Invalid submit shows the summary and focuses it; valid submit calls `onSearch`; URL on load renders each state; table text content                                                                          | Testing Library, `user-event` |
+| components    | Invalid submit shows the field messages, announces the count and focuses the first invalid field; valid submit calls `onSearch`; URL on load renders each state; table text content                         | Testing Library, `user-event` |
 | accessibility | No axe violations in each state and in the form with errors                                                                                                                                                 | `vitest-axe`                  |
-| end to end    | Empty form to results; invalid URL shows summary and never calls the API; origin `error` shows retry; the same three at 375 px                                                                              | Playwright                    |
+| end to end    | Empty form to results; invalid URL shows the field message and never calls the API; origin `error` shows retry; the same three at 375 px                                                                    | Playwright                    |
 
 Conventions: tests in a `__tests__` folder next to the code they cover, named `*.test.ts(x)`; queries by role and label only, never test ids; interactions through `user-event`; no snapshots; `it.each` tables for rules; the mock injected through `ApiProvider` with `createSearchJourneys({ delayMs: 0, now })` rather than `vi.mock`; fake timers only where the delay itself is under test; coverage thresholds of 100 % on `model`, `api` and `shared/lib`, none on `ui`. Every bug found during development gets a failing test first.
 

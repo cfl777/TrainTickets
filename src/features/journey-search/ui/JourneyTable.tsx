@@ -40,20 +40,22 @@ export function JourneyTable({ caption, rows, passengers }: Props) {
         <tbody>
           {rows.map((row) => (
             <tr key={row.id}>
-              <td>
+              <td className={styles.time}>
                 <time dateTime={row.departure.dateTime}>
                   {row.departure.text}
                 </time>
               </td>
-              <td>
+              <td className={styles.time}>
                 <time dateTime={row.arrival.dateTime}>{row.arrival.text}</time>
               </td>
-              <td>
+              <td className={styles.duration}>
                 <time dateTime={row.duration.dateTime}>
                   {row.duration.text}
                 </time>
               </td>
-              <td className={styles.price}>{row.price}</td>
+              <td>
+                <span className={styles.pill}>{row.price}</span>
+              </td>
             </tr>
           ))}
         </tbody>
