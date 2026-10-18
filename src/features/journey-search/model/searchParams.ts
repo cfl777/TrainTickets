@@ -10,7 +10,7 @@
  *   never built by string concatenation.
  * - Dates cross this boundary as yyyy-mm-dd through localDate.
  */
-import { formatLocalDate } from "./localDate.ts";
+import { formatLocalDate } from "../../../shared/lib/localDate.ts";
 import type { ValidJourneyParameters } from "./types.ts";
 import type { RawJourneyParameters } from "./validation.ts";
 

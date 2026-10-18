@@ -78,7 +78,6 @@ src/
         types.ts                    the brief's types verbatim; ValidJourneyParameters (branded)
         validation.ts               validateJourneyParameters(raw, now) → Result
         searchParams.ts             parseSearchParams / toSearchParams
-        localDate.ts                parseLocalDate / formatLocalDate / isSameLocalDay
         duration.ts                 journeyDuration(journey) → minutes
         money.ts                    multiplyAmount in whole cents
         toJourneyRows.ts            view model: Journey → formatted row with id
@@ -99,6 +98,7 @@ src/
     lib/
       format.ts                     formatTime, formatDuration, formatPrice (locales param)
       text.ts                       isSameText: trimmed, collator at base sensitivity
+      localDate.ts                  parseLocalDate / formatLocalDate / startOfLocalDay / isSameLocalDay
     hooks/
       useSearchParams.ts            URL ↔ state: pushState, popstate
     ui/
@@ -305,7 +305,7 @@ Deliberately not done, and when it would be: memoisation, when a profile shows w
 | accessibility | No axe violations in each state and in the form with errors                                                                                                                                                                       | `vitest-axe`                  |
 | end to end    | Empty form to results; invalid URL shows summary and never calls the API; origin `error` shows retry; the same three at 375 px                                                                                                    | Playwright                    |
 
-Conventions: tests co-located as `*.test.ts(x)`; queries by role and label only, never test ids; interactions through `user-event`; no snapshots; `it.each` tables for rules; the mock injected through `ApiProvider` with `createSearchJourneys({ delayMs: 0, now })` rather than `vi.mock`; fake timers only where the delay itself is under test; coverage thresholds of 100 % on `model` and `api`, none on `ui`. Every bug found during development gets a failing test first.
+Conventions: tests co-located as `*.test.ts(x)`; queries by role and label only, never test ids; interactions through `user-event`; no snapshots; `it.each` tables for rules; the mock injected through `ApiProvider` with `createSearchJourneys({ delayMs: 0, now })` rather than `vi.mock`; fake timers only where the delay itself is under test; coverage thresholds of 100 % on `model`, `api` and `shared/lib`, none on `ui`. Every bug found during development gets a failing test first.
 
 Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub Actions matrix in CI, one command per shell locally (see `run.md`).
 
