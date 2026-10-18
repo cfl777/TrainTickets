@@ -183,7 +183,7 @@ The five states:
 | Loading    | `isPending`, no data yet for this key | Status region "Searching for journeys"; decorative spinner hidden from assistive tech; results area keeps a reserved height; a cached search returning from history never shows this |
 | Results    | success, rows > 0                     | Table with a caption stating the search; status region announces "N journeys found"                                                                                                  |
 | No results | success, rows = 0                     | Status region "No journeys found for this search"; form stays filled                                                                                                                 |
-| Error      | error                                 | Alert region with the message and a "Try again" button calling `refetch`; focus moves to it                                                                                          |
+| Error      | error                                 | Alert region with the message and a "Try again" button calling `refetch`; focus moves to it; while the retry runs the page is in the loading state again                             |
 
 A new key clears the old table. Rail sites replace results on a new search and keep them only when refining the same result set, which this page does not do, so `keepPreviousData` is not used. On narrow screens the results region is scrolled into view after submit, respecting `prefers-reduced-motion`. Optimistic updates do not apply: they are a mutation technique and a search is a read.
 
