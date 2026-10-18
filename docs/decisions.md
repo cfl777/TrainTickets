@@ -74,7 +74,7 @@ Nine ambiguities were resolved before anything else, because the API, validation
 
 ## 13 · Delivery (17 Oct 2026)
 
-**Decided:** five documents: `README.md`, `run.md`, `assumptions.md`, `architecture.md`, `decisions.md`. A dependency table with three runtime packages. TypeScript strict flags, a flat ESLint config with type-aware rules and import boundaries, minimal Prettier, editor settings, `lint-staged` with `simple-git-hooks` at pre-commit, `knip` in CI, a size-check script, Conventional Commits, CI in two jobs, a hosted preview.
+**Decided:** five documents: `README.md` in the root and `run.md`, `assumptions.md`, `architecture.md`, `decisions.md` under `docs/`. A dependency table with three runtime packages. TypeScript strict flags, a flat ESLint config with type-aware rules and import boundaries, minimal Prettier, editor settings, `lint-staged` with `simple-git-hooks` at pre-commit, `knip` in CI, a size-check script, Conventional Commits, CI in two jobs, a hosted preview.
 
 **Options considered:** CI as the only gate without hooks (shorter dependency list; declined because a clean commit history is part of what is reviewed). Stylelint (Prettier formats the five stylesheets).
 

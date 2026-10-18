@@ -10,16 +10,16 @@ pnpm dev
 pnpm test
 ```
 
-Everything else, including how to reach each state of the page, is in [run.md](run.md).
+Everything else, including how to reach each state of the page, is in [run.md](docs/run.md).
 
 ## Documents
 
-| File                               | What it holds                                                                                                                                                 |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [run.md](run.md)                   | Prerequisites, every script, how to see each state, troubleshooting                                                                                           |
-| [architecture.md](architecture.md) | Layers, URL contract, data flow, mock API, validation, fetching, formatting, components, accessibility, security, performance, testing, tooling, dependencies |
-| [assumptions.md](assumptions.md)   | Every place the brief was ambiguous, and what was decided                                                                                                     |
-| [decisions.md](decisions.md)       | The architecture decision log: options considered and why each was chosen or declined                                                                         |
+| File                                    | What it holds                                                                                                                                                 |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [run.md](docs/run.md)                   | Prerequisites, every script, how to see each state, troubleshooting                                                                                           |
+| [architecture.md](docs/architecture.md) | Layers, URL contract, data flow, mock API, validation, fetching, formatting, components, accessibility, security, performance, testing, tooling, dependencies |
+| [assumptions.md](docs/assumptions.md)   | Every place the brief was ambiguous, and what was decided                                                                                                     |
+| [decisions.md](docs/decisions.md)       | The architecture decision log: options considered and why each was chosen or declined                                                                         |
 
 ## How to review this repository
 
@@ -50,7 +50,7 @@ Measured on _date to be filled in_ with `pnpm build` and Lighthouse (mobile and 
 
 ## Dependencies
 
-Three runtime dependencies: `react`, `react-dom` and `@tanstack/react-query`. Everything else is development-only. Each package and its one-sentence motivation is listed in [architecture.md](architecture.md#dependencies).
+Three runtime dependencies: `react`, `react-dom` and `@tanstack/react-query`. Everything else is development-only. Each package and its one-sentence motivation is listed in [architecture.md](docs/architecture.md#dependencies).
 
 ## Continuous integration
 
