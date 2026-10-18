@@ -54,4 +54,4 @@ Three runtime dependencies: `react`, `react-dom` and `@tanstack/react-query`. Ev
 
 ## Continuous integration
 
-_CI badge to be added once the repository has a remote._ The workflow runs lint, format check, typecheck, knip, unit tests in two time zones, the build with its size check, and the Playwright suite in a second job.
+[![CI](https://github.com/cfl777/TrainTickets/actions/workflows/ci.yml/badge.svg)](https://github.com/cfl777/TrainTickets/actions/workflows/ci.yml) The workflow runs lint, format check, typecheck, knip, unit tests in two time zones, the build with its size check, and the Playwright suite in a second job.
