@@ -104,7 +104,7 @@ A swap button between origin and destination, and dark mode through a `prefers-c
 
 **Decided:** `size-limit` with `@size-limit/file`, configured in `package.json` to measure `dist/assets/*.js` gzipped against a 100 kB limit, run at the end of `pnpm build`. Gzip rather than size-limit's default Brotli so the number matches Vite's build output and the budget as written.
 
-**Options considered:** A hand-written script over `node:zlib` (thirty lines, no dependency; declined in favour of the recognised tool, whose GitHub Action can post the size delta on pull requests once the repository has them). `@size-limit/preset-app` (bundles with webpack and measures load time; it would measure a different build from the one shipped). `bundlesize` (unmaintained).
+**Options considered:** A hand-written script over `node:zlib` (thirty lines, no dependency; declined in favour of the recognised tool, whose GitHub Action posts the size delta on pull requests, added on 18 Oct 2026 once the repository had them). `@size-limit/preset-app` (bundles with webpack and measures load time; it would measure a different build from the one shipped). `bundlesize` (unmaintained).
 
 ## 20 · Branches and pull requests (18 Oct 2026)
 

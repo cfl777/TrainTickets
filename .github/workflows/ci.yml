@@ -5,7 +5,10 @@
 #   positive and a negative UTC offset.
 # - Job 2 runs Playwright in a real browser against the production build,
 #   separately, so its browser download never slows the fast checks.
-# - Least privilege: the workflow can only read the repository.
+# - Least privilege: the workflow can only read the repository; only the
+#   size comment job may write to the pull request.
+# - A pinned runner image, so a migration of ubuntu-latest cannot change
+#   results under us.
 
 name: CI
 
@@ -24,7 +27,7 @@ concurrency:
 jobs:
   checks:
     name: Checks (${{ matrix.tz }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     strategy:
       fail-fast: false
@@ -49,7 +52,7 @@ jobs:
 
   e2e:
     name: Playwright
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -67,3 +70,24 @@ jobs:
           name: playwright-report
           path: playwright-report
           retention-days: 7
+
+  size:
+    name: Bundle size comment
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - uses: andresz1/size-limit-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          package_manager: pnpm
+          build_script: build
