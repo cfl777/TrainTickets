@@ -12,6 +12,19 @@ export const validationMessages = {
   passengers: "Choose between 1 and 10 passengers",
 } as const;
 
+/** Labels, hints and copy of the search form. */
+export const formStrings = {
+  origin: { label: "Origin", hint: "Station name, for example Enschede" },
+  destination: {
+    label: "Destination",
+    hint: "Station name, for example Hengelo",
+  },
+  date: { label: "Travel date", hint: "Today or later" },
+  passengers: { label: "Passengers", hint: "1 to 10" },
+  submit: "Search journeys",
+  summaryHeading: "There is a problem",
+} as const;
+
 /** Caption of the results table: the search in words, with the date already formatted. */
 export function resultsCaption(parts: {
   readonly origin: string;
