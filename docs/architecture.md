@@ -280,14 +280,14 @@ The brief asks that no invalid or insecure request reaches the search API. The A
 
 ## Performance
 
-| Measure                      | Budget                                                                                                  | How                                           |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Initial JavaScript           | under 100 KB gzipped (expected about 70: React and DOM about 45, TanStack Query about 13, app about 10) | `pnpm build` output and the size-check script |
-| Lighthouse performance       | 95 or above, mobile and desktop                                                                         | recorded in the README                        |
-| Layout shift on state change | 0                                                                                                       | reserved results height                       |
-| Input delay                  | none from React                                                                                         | uncontrolled inputs                           |
-| Font requests                | 0                                                                                                       | system font stack                             |
-| Devtools in production       | 0 bytes                                                                                                 | lazy import behind `import.meta.env.DEV`      |
+| Measure                      | Budget                                                                                                                                           | How                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| Initial JavaScript           | under 100 KB gzipped (measured 83.1 at commit `bef155d`: React and ReactDOM 67.8, TanStack Query client and `useQuery` about 8, the app about 7) | `pnpm build` output and the size-check script |
+| Lighthouse performance       | 95 or above, mobile and desktop                                                                                                                  | recorded in the README                        |
+| Layout shift on state change | 0                                                                                                                                                | reserved results height                       |
+| Input delay                  | none from React                                                                                                                                  | uncontrolled inputs                           |
+| Font requests                | 0                                                                                                                                                | system font stack                             |
+| Devtools in production       | 0 bytes                                                                                                                                          | lazy import behind `import.meta.env.DEV`      |
 
 Formatters are created once per locale. Stale responses are never rendered. Vite's default modern browser target, no legacy plugin.
 

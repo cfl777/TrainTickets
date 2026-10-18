@@ -36,15 +36,15 @@ Tests sit in a `__tests__` folder beside the files they cover. The pure modules 
 
 ## Try it without installing
 
-Hosted preview: https://train-journeys.vercel.app. Only `main` is deployed; at the time of writing the site reflects commit `1a66b5e`. Added for quick initial checks without starting the project; the local route above stays the reference.
+Hosted preview: https://train-journeys.vercel.app. Only `main` is deployed; at the time of writing the site reflects commit `bef155d`. Added for quick initial checks without starting the project; the local route above stays the reference.
 
 ## Build numbers
 
-Measured on 18 October 2026 at commit `1a66b5e`: the size from `pnpm build`, the scores from Lighthouse 12.8 against the hosted preview (mobile and desktop presets).
+Measured on 18 October 2026 at commit `bef155d`: the size from `pnpm build` (size-limit, gzip), the scores from Lighthouse 13.5 run against the hosted preview with the mobile and desktop presets. The first mobile run of a cold browser session scored 92 (LCP 1.6 s); three repeats scored 100 (LCP 1.3 s, no blocking time), so 100 is reported with that note.
 
 | Measure                     | Budget       | Measured                |
 | --------------------------- | ------------ | ----------------------- |
-| Initial JavaScript, gzipped | under 100 KB | 81.64 kB                |
+| Initial JavaScript, gzipped | under 100 KB | 83.09 kB                |
 | Lighthouse performance      | 95 or above  | 100 mobile, 100 desktop |
 | Lighthouse accessibility    | 100          | 100 mobile, 100 desktop |
 
