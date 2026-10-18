@@ -1,8 +1,12 @@
+import { Providers } from "./providers.tsx";
+
 function App() {
   return (
-    <main>
-      <h1>Train journeys</h1>
-    </main>
+    <Providers>
+      <main>
+        <h1>Train journeys</h1>
+      </main>
+    </Providers>
   );
 }
 

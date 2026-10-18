@@ -120,5 +120,4 @@ export function createSearchJourneys({
   };
 }
 
-/** @public The function the brief asks for; wired into the app by its provider. */
 export const searchJourneys: SearchJourneys = createSearchJourneys();
