@@ -73,7 +73,7 @@ src/
         timetable.ts                8 services: origin, destination, sourceDate, times, unitPriceCents
         fixtures.ts                 buildJourneys(timetable, now) → Journey[] for days +1..+8
         searchJourneys.ts           the given signature; filterJourneys + createSearchJourneys
-        *.test.ts
+        __tests__/
       model/                        pure rules + the one React Query hook
         types.ts                    the brief's types verbatim; ValidJourneyParameters (branded)
         validation.ts               validateJourneyParameters(raw, now) → Result
@@ -82,7 +82,7 @@ src/
         toJourneyRows.ts            view model: Journey → formatted row with id
         strings.ts                  all UI copy
         useJourneySearch.ts         parse → validate → useQuery → rows; returns a union
-        *.test.ts(x)
+        __tests__/
       ui/                           presentational components + the page
         SearchPage.tsx              composition only
         SearchForm.tsx (+ .module.css)
@@ -91,7 +91,7 @@ src/
         StatusMessage.tsx (+ .module.css)
         ErrorMessage.tsx
         JourneyTable.tsx (+ .module.css)
-        *.test.tsx
+        __tests__/
       index.ts                      public surface: export { SearchPage }
   shared/
     lib/
@@ -304,7 +304,7 @@ Deliberately not done, and when it would be: memoisation, when a profile shows w
 | accessibility | No axe violations in each state and in the form with errors                                                                                                                                                 | `vitest-axe`                  |
 | end to end    | Empty form to results; invalid URL shows summary and never calls the API; origin `error` shows retry; the same three at 375 px                                                                              | Playwright                    |
 
-Conventions: tests co-located as `*.test.ts(x)`; queries by role and label only, never test ids; interactions through `user-event`; no snapshots; `it.each` tables for rules; the mock injected through `ApiProvider` with `createSearchJourneys({ delayMs: 0, now })` rather than `vi.mock`; fake timers only where the delay itself is under test; coverage thresholds of 100 % on `model`, `api` and `shared/lib`, none on `ui`. Every bug found during development gets a failing test first.
+Conventions: tests in a `__tests__` folder next to the code they cover, named `*.test.ts(x)`; queries by role and label only, never test ids; interactions through `user-event`; no snapshots; `it.each` tables for rules; the mock injected through `ApiProvider` with `createSearchJourneys({ delayMs: 0, now })` rather than `vi.mock`; fake timers only where the delay itself is under test; coverage thresholds of 100 % on `model`, `api` and `shared/lib`, none on `ui`. Every bug found during development gets a failing test first.
 
 Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub Actions matrix in CI, one command per shell locally (see `run.md`).
 

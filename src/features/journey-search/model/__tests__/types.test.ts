@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { JourneyParameters, ValidJourneyParameters } from "./types.ts";
+import type { JourneyParameters, ValidJourneyParameters } from "../types.ts";
 
 describe("ValidJourneyParameters", () => {
   it("is usable wherever JourneyParameters is accepted", () => {
