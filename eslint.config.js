@@ -86,7 +86,7 @@ export default defineConfig([
     files: ["src/features/*/model/**"],
     ignores: [
       "src/features/*/model/use*.ts",
-      "src/features/*/model/*.test.tsx",
+      "src/features/*/model/**/*.test.tsx",
     ],
     rules: {
       "no-restricted-imports": [

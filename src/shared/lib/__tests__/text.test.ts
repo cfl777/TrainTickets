@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSameText } from "./text.ts";
+import { isSameText } from "../text.ts";
 
 describe("isSameText", () => {
   it.each([

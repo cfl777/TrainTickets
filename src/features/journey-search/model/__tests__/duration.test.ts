@@ -3,8 +3,8 @@ import {
   journeyDuration,
   toHoursAndMinutes,
   toIsoDuration,
-} from "./duration.ts";
-import type { Journey } from "./types.ts";
+} from "../duration.ts";
+import type { Journey } from "../types.ts";
 
 function journey(departure: Date, arrival: Date): Journey {
   return { departure, arrival, price: { value: 0, currency: "EUR" } };

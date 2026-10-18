@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildJourneys } from "./fixtures.ts";
+import { buildJourneys } from "../fixtures.ts";
 import {
   createSearchJourneys,
   filterJourneys,
   InvalidParametersError,
   searchJourneys,
   SearchError,
-} from "./searchJourneys.ts";
-import { timetable } from "./timetable.ts";
+} from "../searchJourneys.ts";
+import { timetable } from "../timetable.ts";
 
 const tuesday = new Date(2026, 9, 20, 15, 30);
 const tomorrow = new Date(2026, 9, 21);

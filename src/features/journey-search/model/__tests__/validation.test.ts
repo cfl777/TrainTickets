@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { validationMessages } from "./strings.ts";
-import { validateJourneyParameters } from "./validation.ts";
+import { validationMessages } from "../strings.ts";
+import { validateJourneyParameters } from "../validation.ts";
 
 type Raw = Parameters<typeof validateJourneyParameters>[0];
 

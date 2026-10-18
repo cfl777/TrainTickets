@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { parseSearchParams, toSearchParams } from "./searchParams.ts";
-import { validateJourneyParameters } from "./validation.ts";
+import { parseSearchParams, toSearchParams } from "../searchParams.ts";
+import { validateJourneyParameters } from "../validation.ts";
 
 const now = new Date(2026, 9, 20, 15, 30);
 
