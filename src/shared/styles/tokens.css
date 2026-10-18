@@ -7,12 +7,15 @@
  *   be perceived (input borders, focus) uses --color-border or the accent.
  * - Spacing in rem so the layout scales with the user's font size.
  * - Controls 44 px tall at every width (2.5.8 and the mobile guidance).
+ * - Placeholders get their own, lighter grey (still 4.5:1 on their field),
+ *   so an example never reads as an entered value.
  * - Breakpoints: 640 px and 960 px. Custom properties cannot be used in
  *   media queries, so the two values are repeated literally where used.
  */
 :root {
   --color-text: #1b1b1b;
   --color-text-muted: #4a4a4a;
+  --color-placeholder: #767676;
   --color-background: #f6f7f5;
   --color-card: #ffffff;
   --color-surface: #eef1ee;
