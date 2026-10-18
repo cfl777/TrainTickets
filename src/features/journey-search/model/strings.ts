@@ -45,6 +45,7 @@ export const resultStrings = {
     count === 1 ? "1 journey found" : `${String(count)} journeys found`,
   none: "No journeys found for this search",
   retry: "Try again",
+  resultsRegion: "Search results",
   tableRegion: "Journey results",
   columns: {
     departure: "Departure",
