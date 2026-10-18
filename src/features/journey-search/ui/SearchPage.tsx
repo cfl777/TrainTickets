@@ -14,9 +14,10 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "../../../shared/hooks/useSearchParams.ts";
 import { toSearchParams } from "../model/searchParams.ts";
-import { appTitle, searchTitle } from "../model/strings.ts";
+import { appTitle, formStrings, searchTitle } from "../model/strings.ts";
 import { useJourneySearch } from "../model/useJourneySearch.ts";
 import { SearchForm } from "./SearchForm.tsx";
+import styles from "./SearchPage.module.css";
 import { SearchResults } from "./SearchResults.tsx";
 
 const NARROW_SCREEN = "(max-width: 639px)";
@@ -60,6 +61,7 @@ export function SearchPage() {
             setSearch(toSearchParams(params));
           }}
         />
+        <p className={styles.note}>{formStrings.stationsNote}</p>
       </search>
       <div ref={resultsRef}>
         <SearchResults state={state} />

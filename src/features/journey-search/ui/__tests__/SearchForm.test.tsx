@@ -39,24 +39,36 @@ describe("SearchForm", () => {
     expect(container.querySelector("form")).toHaveAttribute("novalidate");
   });
 
-  it("shows and focuses the summary on an invalid submit, and does not search", async () => {
+  it("marks the fields, announces the count and focuses the first invalid field on an invalid submit", async () => {
     const { user, onSearch } = renderForm();
     await user.click(screen.getByRole("button", { name: "Search journeys" }));
 
-    const summary = screen.getByRole("alert");
-    expect(summary).toHaveFocus();
-    expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual(
-      ["Enter an origin", "Enter a destination"],
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "2 fields need attention",
     );
+    expect(screen.getByLabelText("Origin")).toHaveFocus();
     expect(screen.getByLabelText("Origin")).toHaveAttribute(
       "aria-invalid",
       "true",
     );
-    expect(screen.getAllByText("Enter an origin")).toHaveLength(2);
+    expect(screen.getByLabelText("Origin")).toHaveAccessibleDescription(
+      "Enter an origin",
+    );
+    expect(screen.getByText("Enter a destination")).toBeInTheDocument();
     expect(onSearch).not.toHaveBeenCalled();
   });
 
-  it("calls onSearch with the validated parameters and shows no summary", async () => {
+  it("refocuses the first invalid field on a repeated failed submit", async () => {
+    const { user } = renderForm();
+    const button = screen.getByRole("button", { name: "Search journeys" });
+    await user.click(button);
+    await user.click(screen.getByLabelText("Passengers"));
+    expect(screen.getByLabelText("Origin")).not.toHaveFocus();
+    await user.click(button);
+    expect(screen.getByLabelText("Origin")).toHaveFocus();
+  });
+
+  it("calls onSearch with the validated parameters and announces nothing", async () => {
     const { user, onSearch } = renderForm();
     await user.type(screen.getByLabelText("Origin"), " Enschede ");
     await user.type(screen.getByLabelText("Destination"), "Hengelo");
@@ -84,7 +96,7 @@ describe("SearchForm", () => {
     await user.type(screen.getByLabelText("Origin"), "Enschede");
 
     expect(screen.queryByText("Enter an origin")).not.toBeInTheDocument();
-    expect(screen.getAllByText("Enter a destination")).toHaveLength(2);
+    expect(screen.getByText("Enter a destination")).toBeInTheDocument();
     expect(screen.getByLabelText("Origin")).not.toHaveAttribute("aria-invalid");
   });
 
@@ -92,6 +104,7 @@ describe("SearchForm", () => {
     const { user } = renderForm();
     await user.type(screen.getByLabelText("Origin"), "E");
     await user.clear(screen.getByLabelText("Origin"));
+    expect(screen.queryByText("Enter an origin")).not.toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
@@ -101,8 +114,9 @@ describe("SearchForm", () => {
     await user.type(screen.getByLabelText("Destination"), "enschede");
     await user.click(screen.getByRole("button", { name: "Search journeys" }));
     expect(
-      screen.getAllByText("Destination must differ from origin"),
-    ).toHaveLength(2);
+      screen.getByText("Destination must differ from origin"),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Destination")).toHaveFocus();
   });
 
   it("rejects passengers out of range", async () => {
@@ -112,8 +126,8 @@ describe("SearchForm", () => {
     await user.type(passengers, "11");
     await user.click(screen.getByRole("button", { name: "Search journeys" }));
     expect(
-      screen.getAllByText("Choose between 1 and 10 passengers"),
-    ).toHaveLength(2);
+      screen.getByText("Choose between 1 and 10 passengers"),
+    ).toBeInTheDocument();
   });
 
   it("pre-fills from the URL and shows its errors on load", () => {
@@ -129,9 +143,12 @@ describe("SearchForm", () => {
     expect(screen.getByLabelText("Origin")).toHaveValue("Enschede");
     expect(screen.getByLabelText("Travel date")).toHaveValue("2025-04-20");
     expect(screen.getByLabelText("Passengers")).toHaveValue(2);
-    expect(screen.getByRole("alert")).toHaveFocus();
+    expect(screen.getByLabelText("Travel date")).toHaveFocus();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "1 field needs attention",
+    );
     expect(
-      screen.getByRole("link", { name: "Choose a date from today onwards" }),
+      screen.getByText("Choose a date from today onwards"),
     ).toBeInTheDocument();
   });
 

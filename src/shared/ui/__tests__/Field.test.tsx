@@ -45,6 +45,19 @@ describe("Field", () => {
     expect(screen.getByLabelText("Origin")).toHaveAttribute("id", "origin");
   });
 
+  it("keeps a decorative icon out of the accessibility tree", async () => {
+    const { container } = render(
+      <Field label="Origin" icon={<svg data-testid="pin" />}>
+        {(control) => <input type="text" {...control} />}
+      </Field>,
+    );
+    expect(screen.getByLabelText("Origin")).toHaveAccessibleName("Origin");
+    expect(
+      container.querySelector('[aria-hidden="true"] svg'),
+    ).toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
   it("has no accessibility violations with and without an error", async () => {
     const { container, rerender } = render(
       <Field label="Origin">
