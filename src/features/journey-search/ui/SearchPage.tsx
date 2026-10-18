@@ -7,14 +7,22 @@
  * - The form is keyed on the search string, so a successful search resets
  *   it to fresh defaults from the URL and a shared link pre-fills it.
  * - Submitting writes the URL; the hook reacts to the URL (decision 04).
- * - The document title reflects the search (2.4.2); on narrow screens the
- *   results scroll into view after a submit, without motion when the
- *   user prefers none.
+ * - The document title reflects the search (2.4.2).
+ * - When the search changes after a submit, focus moves to the results
+ *   region, so it is never lost when the form remounts and a screen-reader
+ *   user lands where the answer is (2.4.3). On narrow screens the results
+ *   also scroll into view, without motion when the user prefers none. A
+ *   page opened with a query string keeps its natural focus.
  */
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "../../../shared/hooks/useSearchParams.ts";
 import { toSearchParams } from "../model/searchParams.ts";
-import { appTitle, formStrings, searchTitle } from "../model/strings.ts";
+import {
+  appTitle,
+  formStrings,
+  resultStrings,
+  searchTitle,
+} from "../model/strings.ts";
 import { useJourneySearch } from "../model/useJourneySearch.ts";
 import { SearchForm } from "./SearchForm.tsx";
 import styles from "./SearchPage.module.css";
@@ -26,7 +34,8 @@ const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 export function SearchPage() {
   const { search, setSearch } = useSearchParams();
   const state = useJourneySearch(search, { locales: navigator.languages });
-  const resultsRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLElement>(null);
+  const previousSearch = useRef(search);
 
   const searching =
     state.kind === "loading" ||
@@ -40,13 +49,21 @@ export function SearchPage() {
   }, [searching, origin, destination]);
 
   useEffect(() => {
-    if (!searching || !window.matchMedia(NARROW_SCREEN).matches) {
+    if (previousSearch.current === search) {
       return;
     }
-    resultsRef.current?.scrollIntoView({
-      behavior: window.matchMedia(REDUCED_MOTION).matches ? "auto" : "smooth",
-      block: "start",
-    });
+    previousSearch.current = search;
+    const results = resultsRef.current;
+    if (!searching || results === null) {
+      return;
+    }
+    results.focus({ preventScroll: true });
+    if (window.matchMedia(NARROW_SCREEN).matches) {
+      results.scrollIntoView({
+        behavior: window.matchMedia(REDUCED_MOTION).matches ? "auto" : "smooth",
+        block: "start",
+      });
+    }
   }, [search, searching]);
 
   return (
@@ -63,9 +80,14 @@ export function SearchPage() {
         />
         <p className={styles.note}>{formStrings.stationsNote}</p>
       </search>
-      <div ref={resultsRef}>
+      <section
+        ref={resultsRef}
+        aria-label={resultStrings.resultsRegion}
+        tabIndex={-1}
+        className={styles.results}
+      >
         <SearchResults state={state} />
-      </div>
+      </section>
     </main>
   );
 }
