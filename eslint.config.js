@@ -66,7 +66,18 @@ export default defineConfig([
         "error",
         {
           paths: ["react", "react-dom"],
-          patterns: ["**/model/**", "**/ui/**"],
+          patterns: [
+            {
+              // The brief's contract types live in model/types.ts and the
+              // mock implements them; nothing else in model is reachable.
+              group: ["**/model/**", "!**/model/types.ts"],
+              message: "api may import only the contract types from model.",
+            },
+            {
+              group: ["**/ui/**"],
+              message: "api never imports ui.",
+            },
+          ],
         },
       ],
     },

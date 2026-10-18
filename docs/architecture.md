@@ -111,7 +111,7 @@ src/
 
 Import rules, enforced with `no-restricted-imports` overrides in the ESLint config:
 
-- Inside the feature the arrow is one way: `ui → model → api`.
+- Inside the feature the arrow is one way: `ui → model → api`. The one exception is `model/types.ts`, which holds the brief's contract and is the only `model` file `api` may import.
 - `api` and the pure files in `model` never import React.
 - `shared` never imports from `features`.
 - `app` imports a feature only through its `index.ts`.
