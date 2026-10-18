@@ -72,6 +72,7 @@ describe("useJourneySearch", () => {
     expect(state.kind).toBe("success");
     if (state.kind !== "success") return;
     expect(state.count).toBe(2);
+    expect(state.passengers).toBe(2);
     expect(state.rows.map((row) => row.departure.text)).toEqual([
       "9:00 AM",
       "2:00 PM",
