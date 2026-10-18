@@ -105,3 +105,9 @@ A swap button between origin and destination, and dark mode through a `prefers-c
 **Decided:** `size-limit` with `@size-limit/file`, configured in `package.json` to measure `dist/assets/*.js` gzipped against a 100 kB limit, run at the end of `pnpm build`. Gzip rather than size-limit's default Brotli so the number matches Vite's build output and the budget as written.
 
 **Options considered:** A hand-written script over `node:zlib` (thirty lines, no dependency; declined in favour of the recognised tool, whose GitHub Action can post the size delta on pull requests once the repository has them). `@size-limit/preset-app` (bundles with webpack and measures load time; it would measure a different build from the one shipped). `bundlesize` (unmaintained).
+
+## 20 · Branches and pull requests (18 Oct 2026)
+
+**Decided:** from Phase 3 on, each item in the README's "How to review" order is built on its own branch and merged through a pull request: `feat/model-types`, `feat/model-validation`, `feat/model-url-and-date`, `feat/api-mock`, `feat/model-search-hook`, `feat/ui`. `main` is protected: the three CI jobs must pass, history is linear, and nobody pushes to it directly. Merges are rebase-only, so every commit survives and the history stays the deliverable it has been since the first commit. Pull request descriptions follow the commit message shape: a goal line and bullets.
+
+**Options considered:** Committing to `main` with CI reporting after the fact (how Phase 2 was done; a red run would already be in the history). Squash merging (one commit per pull request, which would discard the granular history). Merge commits (keep the commits but add a merge node per pull request; declined for the linear history).
