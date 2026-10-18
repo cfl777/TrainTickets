@@ -315,7 +315,7 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 - Prettier with a near-empty configuration; formats CSS as well, so no Stylelint.
 - `.editorconfig`; `.vscode/extensions.json` and `settings.json` for format and fix on save.
 - `simple-git-hooks` running `lint-staged` at pre-commit and `commitlint` at commit-msg, installed by the `prepare` script.
-- A size-check script that gzips the built JavaScript and fails above 100 KB.
+- `size-limit` with its file plugin measures the gzipped JavaScript in `dist/` after every build and fails above 100 kB.
 - `knip` in CI with zero findings required.
 - StrictMode on in development, which double-invokes effects and proves the hooks are idempotent.
 - CI: job 1 runs lint, format check, typecheck, knip, unit tests in both time zones, build with size check; job 2 runs Playwright desktop and mobile.
@@ -336,6 +336,7 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 | `lint-staged`, `simple-git-hooks`                                                                                                                                   | dev     | Pre-commit formatting and lint on staged files                                                       |
 | `@commitlint/cli`, `@commitlint/config-conventional`                                                                                                                | dev     | Rejects commit messages that are not Conventional Commits, so the history reads as documentation     |
 | `knip`                                                                                                                                                              | dev     | Finds unused files, exports and dependencies                                                         |
+| `size-limit`, `@size-limit/file`                                                                                                                                    | dev     | Enforces the 100 kB gzipped JavaScript budget on every build                                         |
 | `@tanstack/react-query-devtools`                                                                                                                                    | dev     | Visible cache in development only                                                                    |
 
 ## Considered and not adopted

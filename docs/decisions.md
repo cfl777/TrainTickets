@@ -99,3 +99,9 @@ A swap button between origin and destination, and dark mode through a `prefers-c
 **Decided:** `commitlint` with `config-conventional` at the commit-msg hook, through the same `simple-git-hooks`. Header at most 72 characters; scope optional but, when given, one of `api`, `model`, `ui`, `shared`, `app`, `ci`, `deps`, `docs`. The package's own install script is left disabled under pnpm 10; the `prepare` script installs the hooks explicitly instead.
 
 **Options considered:** Husky (a second hook manager for the same job). A hand-written regex script (zero dependencies, but unmaintained rules and worse error messages). A CI step over the commit range (one committer, and the hook already covers it).
+
+## 19 · Bundle size check (18 Oct 2026)
+
+**Decided:** `size-limit` with `@size-limit/file`, configured in `package.json` to measure `dist/assets/*.js` gzipped against a 100 kB limit, run at the end of `pnpm build`. Gzip rather than size-limit's default Brotli so the number matches Vite's build output and the budget as written.
+
+**Options considered:** A hand-written script over `node:zlib` (thirty lines, no dependency; declined in favour of the recognised tool, whose GitHub Action can post the size delta on pull requests once the repository has them). `@size-limit/preset-app` (bundles with webpack and measures load time; it would measure a different build from the one shipped). `bundlesize` (unmaintained).
