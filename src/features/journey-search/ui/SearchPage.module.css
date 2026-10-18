@@ -1,7 +1,10 @@
+/* Under the form card: 8 px above (the card leaves 24, so -16), inset to the
+   card's content edge (6 px edge + 16 px padding), small and subtle. */
 .note {
-  margin: calc(-1 * var(--space-2)) 0 var(--space-6);
-  font-size: 0.9375rem;
-  color: var(--color-text-muted);
+  margin: calc(-1 * var(--space-4)) 0 var(--space-6);
+  padding-left: calc(6px + var(--space-4));
+  font-size: 0.8125rem;
+  color: var(--color-text-subtle);
 }
 
 /* Focused by script after a search; no ring, the status text is the cue. */
