@@ -226,7 +226,7 @@ App
 
 ## Responsive
 
-Mobile-first. Base styles are the phone layout; two breakpoints held as custom properties in `tokens.css`: around 640 px the form goes from one stacked column to two, around 960 px to one row with the button at the end. Units are `rem` and percentages with a page `max-width`; headings use `clamp`. Inputs and the primary button are 44 px tall at every width.
+Mobile-first. Base styles are the phone layout; two breakpoints documented in `tokens.css` and repeated literally in the media queries, since custom properties cannot be used there: around 640 px the form goes from one stacked column to two, around 960 px to one row with the button at the end. Units are `rem` and percentages with a page `max-width`; headings use `clamp`. Inputs and the primary button are 44 px tall at every width.
 
 The results table stays a table at every width. Four short columns fit about 320 px in most locales; as a safety net the table sits in an `overflow-x: auto` wrapper that is keyboard focusable and labelled. Rows are never turned into cards, which would destroy table semantics for screen readers.
 
