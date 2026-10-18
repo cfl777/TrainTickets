@@ -98,6 +98,7 @@ src/
   shared/
     lib/
       format.ts                     formatTime, formatDuration, formatPrice (locales param)
+      text.ts                       isSameText: trimmed, collator at base sensitivity
     hooks/
       useSearchParams.ts            URL ↔ state: pushState, popstate
     ui/
