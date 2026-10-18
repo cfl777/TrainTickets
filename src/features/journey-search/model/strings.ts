@@ -11,3 +11,17 @@ export const validationMessages = {
   date: "Choose a date from today onwards",
   passengers: "Choose between 1 and 10 passengers",
 } as const;
+
+/** Caption of the results table: the search in words, with the date already formatted. */
+export function resultsCaption(parts: {
+  readonly origin: string;
+  readonly destination: string;
+  readonly date: string;
+  readonly passengers: number;
+}): string {
+  const noun = parts.passengers === 1 ? "passenger" : "passengers";
+  return `${parts.origin} to ${parts.destination} on ${parts.date}, ${String(parts.passengers)} ${noun}`;
+}
+
+export const searchErrorMessage =
+  "Something went wrong while searching for journeys.";
