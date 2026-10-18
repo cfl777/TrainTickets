@@ -1,0 +1,40 @@
+.form {
+  margin-bottom: var(--space-8);
+}
+
+.fields {
+  display: grid;
+  gap: 0 var(--space-4);
+}
+
+.submit {
+  min-height: var(--control-height);
+  padding: 0 var(--space-6);
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .fields {
+    grid-template-columns: 1fr 1fr;
+  }
+  .submit {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+@media (min-width: 960px) {
+  .fields {
+    grid-template-columns: 2fr 2fr 1.5fr 1fr auto;
+    align-items: end;
+  }
+  .submit {
+    grid-column: auto;
+  }
+}
