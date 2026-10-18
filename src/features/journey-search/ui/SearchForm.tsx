@@ -1,22 +1,30 @@
 /**
- * The search form (decision 05). Goals:
+ * The search form (decision 05, amended by decision 22). Goals:
  *
  * - Submitting does not search: the action validates FormData with the
  *   shared validator and either returns errors or calls onSearch with the
  *   branded parameters. The parent writes the URL.
  * - Uncontrolled inputs named like the URL keys; typing never re-renders
- *   the page. noValidate: our summary is the only feedback, native
+ *   the page. noValidate: our messages are the only feedback, native
  *   required/min/max stay for semantics and mobile keyboards.
- * - After a failed submit, each errored field clears its own message once
- *   valid; nothing nags before the first submit. Action-state errors take
- *   precedence over URL errors.
+ * - Errors are shown under their fields. After a failed submit, focus moves
+ *   to the first invalid field and a visually hidden alert says how many
+ *   fields need attention, so screen-reader users learn what sighted users
+ *   see. Each errored field clears its own message once valid; nothing nags
+ *   before the first submit. Action-state errors take precedence over URL
+ *   errors.
  * - React resets uncontrolled inputs after an action, so the action keeps
  *   the submitted values in state and the inputs read defaultValue from
  *   there first; a failed submit never wipes what was typed.
  * - Defaults: passengers 1, date tomorrow (assumption 7); min date today.
  */
-import { useActionState, useState, type ChangeEvent } from "react";
+import { useActionState, useEffect, useState, type ChangeEvent } from "react";
 import { Field } from "../../../shared/ui/Field.tsx";
+import {
+  CalendarIcon,
+  MapPinIcon,
+  UsersIcon,
+} from "../../../shared/ui/icons.tsx";
 import {
   formatLocalDate,
   startOfLocalDay,
@@ -29,7 +37,6 @@ import {
   type RawJourneyParameters,
   type ValidationErrors,
 } from "../model/validation.ts";
-import { ErrorSummary } from "./ErrorSummary.tsx";
 import styles from "./SearchForm.module.css";
 
 const FIELDS = [
@@ -65,6 +72,12 @@ function readRaw(formData: FormData): RawJourneyParameters {
     date: read("date"),
     passengers: read("passengers"),
   };
+}
+
+function invalidFields(errors: ValidationErrors | null): JourneyField[] {
+  return errors === null
+    ? []
+    : FIELDS.filter((field) => errors[field] !== undefined);
 }
 
 /** Keeps only the errors for fields that were already shown, so messages clear but never appear mid-typing. */
@@ -130,6 +143,16 @@ export function SearchForm({
         ? live.errors
         : state.errors;
 
+  // After each failed submit (and on load with URL errors), focus the first
+  // invalid field; the attempt counter makes a repeat failure refocus too.
+  const failedFields = invalidFields(state.errors);
+  const firstInvalid = failedFields[0] ?? null;
+  useEffect(() => {
+    if (firstInvalid !== null) {
+      document.getElementById(firstInvalid)?.focus();
+    }
+  }, [firstInvalid, state.attempt]);
+
   function handleChange(event: ChangeEvent<HTMLFormElement>) {
     if (shownErrors === null) {
       return;
@@ -154,14 +177,16 @@ export function SearchForm({
       onChange={handleChange}
       className={styles.form}
     >
-      {shownErrors === null ? null : (
-        <ErrorSummary errors={shownErrors} attempt={state.attempt} />
-      )}
+      {failedFields.length > 0 ? (
+        <p role="alert" className={styles.visuallyHidden}>
+          {formStrings.errorsAnnouncement(failedFields.length)}
+        </p>
+      ) : null}
       <div className={styles.fields}>
         <Field
           id="origin"
           label={formStrings.origin.label}
-          hint={formStrings.origin.hint}
+          icon={<MapPinIcon />}
           {...errorProp(shownErrors, "origin")}
         >
           {(control) => (
@@ -172,6 +197,7 @@ export function SearchForm({
               required
               maxLength={100}
               defaultValue={value("origin") ?? ""}
+              placeholder={formStrings.origin.placeholder}
               autoCapitalize="words"
               spellCheck={false}
               autoComplete="off"
@@ -181,7 +207,7 @@ export function SearchForm({
         <Field
           id="destination"
           label={formStrings.destination.label}
-          hint={formStrings.destination.hint}
+          icon={<MapPinIcon />}
           {...errorProp(shownErrors, "destination")}
         >
           {(control) => (
@@ -192,6 +218,7 @@ export function SearchForm({
               required
               maxLength={100}
               defaultValue={value("destination") ?? ""}
+              placeholder={formStrings.destination.placeholder}
               autoCapitalize="words"
               spellCheck={false}
               autoComplete="off"
@@ -201,7 +228,7 @@ export function SearchForm({
         <Field
           id="date"
           label={formStrings.date.label}
-          hint={formStrings.date.hint}
+          icon={<CalendarIcon />}
           {...errorProp(shownErrors, "date")}
         >
           {(control) => (
@@ -218,7 +245,7 @@ export function SearchForm({
         <Field
           id="passengers"
           label={formStrings.passengers.label}
-          hint={formStrings.passengers.hint}
+          icon={<UsersIcon />}
           {...errorProp(shownErrors, "passengers")}
         >
           {(control) => (

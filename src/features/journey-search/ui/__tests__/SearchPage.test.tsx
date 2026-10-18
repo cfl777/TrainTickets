@@ -80,13 +80,17 @@ describe("SearchPage", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("shows the summary for an invalid URL and never calls the api", async () => {
+  it("shows the field error for an invalid URL and never calls the api", async () => {
     const { container, api } = renderPage(
       `/?origin=Enschede&destination=Hengelo&date=${tomorrowValue}`,
     );
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Choose between 1 and 10 passengers",
+      "1 field needs attention",
     );
+    expect(
+      screen.getByText("Choose between 1 and 10 passengers"),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Passengers")).toHaveFocus();
     expect(screen.getByLabelText("Destination")).toHaveValue("Hengelo");
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
     expect(api).not.toHaveBeenCalled();

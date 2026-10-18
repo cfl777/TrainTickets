@@ -5,8 +5,11 @@
  *   the id and aria attributes, so Field never knows the input type.
  * - aria-describedby lists the hint and, when present, the error;
  *   aria-invalid is set only while there is an error (3.3.1, 3.3.3, 4.1.2).
- * - Ids come from useId unless given, so the error summary can link to a
- *   field by a known id.
+ * - The error message sits directly under the control it belongs to.
+ * - Ids come from useId unless given, so a parent can focus a field by a
+ *   known id.
+ * - An optional decorative icon sits inside the control; it is hidden from
+ *   assistive tech, the label carries the meaning.
  */
 import { useId, type ReactNode } from "react";
 import styles from "./Field.module.css";
@@ -22,10 +25,11 @@ type FieldProps = Readonly<{
   hint?: string;
   error?: string;
   id?: string;
+  icon?: ReactNode;
   children: (control: ControlProps) => ReactNode;
 }>;
 
-export function Field({ label, hint, error, id, children }: FieldProps) {
+export function Field({ label, hint, error, id, icon, children }: FieldProps) {
   const generatedId = useId();
   const controlId = id ?? generatedId;
   const hintId = `${controlId}-hint`;
@@ -60,12 +64,21 @@ export function Field({ label, hint, error, id, children }: FieldProps) {
           {hint}
         </p>
       )}
+      {icon === undefined ? (
+        children(control)
+      ) : (
+        <div className={styles.control}>
+          <span className={styles.icon} aria-hidden="true">
+            {icon}
+          </span>
+          {children(control)}
+        </div>
+      )}
       {error === undefined ? null : (
         <p className={styles.error} id={errorId}>
           {error}
         </p>
       )}
-      {children(control)}
     </div>
   );
 }
