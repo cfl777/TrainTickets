@@ -31,7 +31,7 @@ export type RawJourneyParameters = Readonly<
   Record<JourneyField, string | null>
 >;
 
-type ValidationErrors = Readonly<Partial<Record<JourneyField, string>>>;
+export type ValidationErrors = Readonly<Partial<Record<JourneyField, string>>>;
 
 type ValidationResult =
   | { readonly ok: true; readonly value: ValidJourneyParameters }

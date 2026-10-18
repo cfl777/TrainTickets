@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { formatDuration, formatPrice, formatTime } from "../format.ts";
+import {
+  formatDate,
+  formatDuration,
+  formatPrice,
+  formatTime,
+} from "../format.ts";
 
 const nl = ["nl-NL"];
 const us = ["en-US"];
@@ -22,6 +27,25 @@ describe("formatTime", () => {
     const spy = vi.spyOn(Intl, "DateTimeFormat");
     formatTime(nineOhFive, ["fr-FR"]);
     formatTime(nineOhFive, ["fr-FR"]);
+    expect(spy).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
+  });
+});
+
+describe("formatDate", () => {
+  const wednesday = new Date(2026, 9, 21);
+
+  it("writes the full date in the locale's order and language", () => {
+    expect(visible(formatDate(wednesday, nl))).toBe("woensdag 21 oktober 2026");
+    expect(visible(formatDate(wednesday, us))).toBe(
+      "Wednesday, October 21, 2026",
+    );
+  });
+
+  it("reuses one formatter per locale", () => {
+    const spy = vi.spyOn(Intl, "DateTimeFormat");
+    formatDate(wednesday, ["fr-FR"]);
+    formatDate(wednesday, ["fr-FR"]);
     expect(spy).toHaveBeenCalledTimes(1);
     spy.mockRestore();
   });
