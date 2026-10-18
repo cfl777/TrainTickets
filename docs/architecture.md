@@ -228,13 +228,13 @@ App
 
 Mobile-first. Base styles are the phone layout; two breakpoints documented in `tokens.css` and repeated literally in the media queries, since custom properties cannot be used there: around 640 px the form goes from one stacked column to two, around 960 px to one row with the button at the end. Units are `rem` and percentages with a page `max-width`; headings use `clamp`. Inputs and the primary button are 44 px tall at every width.
 
-The results table stays a table at every width. Four short columns fit about 320 px in most locales; as a safety net the table sits in an `overflow-x: auto` wrapper that is keyboard focusable and labelled. Rows are never turned into cards, which would destroy table semantics for screen readers.
+The results table stays a table at every width. Four short columns fit from about 350 px in the widest locale (12-hour times); at 320 px the table sits in an `overflow-x: auto` wrapper that is keyboard focusable and labelled and scrolls by a few pixels, while the page itself never scrolls horizontally. Rows are never turned into cards, which would destroy table semantics for screen readers.
 
 Verified manually at 320, 375, 768, 1024 and 1440 px (dates recorded below) and by the Playwright mobile project.
 
-| Width                     | Checked on        |
-| ------------------------- | ----------------- |
-| 320, 375, 768, 1024, 1440 | _to be filled in_ |
+| Width                     | Checked on                                                                                                                                               |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 320, 375, 768, 1024, 1440 | 18 Oct 2026, development build, viewport emulation: one column to 639 px, two columns from 640, one row from 960; no horizontal page scroll at any width |
 
 ## Accessibility
 

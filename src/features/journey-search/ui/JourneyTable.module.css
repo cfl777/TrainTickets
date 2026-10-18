@@ -1,0 +1,42 @@
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.caption {
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: var(--space-2);
+}
+
+.table th,
+.table td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-2) var(--space-1);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Headers may wrap ("Total for 2 passengers"); values never break mid-time. */
+.table td {
+  white-space: nowrap;
+}
+
+.table th {
+  background: var(--color-surface);
+}
+
+.price {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 640px) {
+  .table th,
+  .table td {
+    padding: var(--space-3) var(--space-2);
+  }
+}
