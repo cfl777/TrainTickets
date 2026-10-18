@@ -18,7 +18,10 @@
  * for three string checks. See docs/decisions.md, entry 05.
  */
 import { isSameText } from "../../../shared/lib/text.ts";
-import { parseLocalDate, startOfLocalDay } from "./localDate.ts";
+import {
+  parseLocalDate,
+  startOfLocalDay,
+} from "../../../shared/lib/localDate.ts";
 import { validationMessages } from "./strings.ts";
 import type { ValidJourneyParameters } from "./types.ts";
 

@@ -27,12 +27,12 @@ Read the code in this order. Each file is small and the next one builds on it.
 
 1. `src/features/journey-search/model/types.ts` — the contract from the brief, verbatim, plus the branded `ValidJourneyParameters` type.
 2. `src/features/journey-search/model/validation.ts` — the one validator shared by the form and the URL.
-3. `src/features/journey-search/model/searchParams.ts` and `localDate.ts` — the URL codec and the calendar-day boundary.
+3. `src/features/journey-search/model/searchParams.ts` and `src/shared/lib/localDate.ts` — the URL codec and the calendar-day boundary.
 4. `src/features/journey-search/api/` — the timetable, the fixture builder and `searchJourneys` with its factory.
 5. `src/features/journey-search/model/useJourneySearch.ts` — parse, validate, query, build rows; returns one discriminated union.
 6. `src/features/journey-search/ui/SearchPage.tsx` — composition only.
 
-Tests sit next to the file they cover. The pure modules in `model` and `api` have 100 % coverage thresholds.
+Tests sit next to the file they cover. The pure modules in `model`, `api` and `shared/lib` have 100 % coverage thresholds.
 
 ## Try it without installing
 
