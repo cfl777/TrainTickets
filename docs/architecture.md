@@ -79,7 +79,6 @@ src/
         validation.ts               validateJourneyParameters(raw, now) → Result
         searchParams.ts             parseSearchParams / toSearchParams
         duration.ts                 journeyDuration(journey) → minutes
-        money.ts                    multiplyAmount in whole cents
         toJourneyRows.ts            view model: Journey → formatted row with id
         strings.ts                  all UI copy
         useJourneySearch.ts         parse → validate → useQuery → rows; returns a union
@@ -296,14 +295,14 @@ Deliberately not done, and when it would be: memoisation, when a profile shows w
 
 ## Testing
 
-| Layer         | What is tested                                                                                                                                                                                                                    | Tool                          |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `model`       | Validator rules and boundaries, including today is valid; URL codec round trip; `localDate` write and read paths under Europe/Amsterdam and America/New_York; duration maths; cents multiplication; formatters with fixed locales | Vitest                        |
-| `api`         | Fixture builds 8 × 8 journeys; matching rules; case and whitespace folding; totals; sort order; frozen result; error trigger; invalid parameters rejected                                                                         | Vitest                        |
-| hook          | The five states; stale response never shown                                                                                                                                                                                       | Vitest, Testing Library       |
-| components    | Invalid submit shows the summary and focuses it; valid submit calls `onSearch`; URL on load renders each state; table text content                                                                                                | Testing Library, `user-event` |
-| accessibility | No axe violations in each state and in the form with errors                                                                                                                                                                       | `vitest-axe`                  |
-| end to end    | Empty form to results; invalid URL shows summary and never calls the API; origin `error` shows retry; the same three at 375 px                                                                                                    | Playwright                    |
+| Layer         | What is tested                                                                                                                                                                                              | Tool                          |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `model`       | Validator rules and boundaries, including today is valid; URL codec round trip; `localDate` write and read paths under Europe/Amsterdam and America/New_York; duration maths; formatters with fixed locales | Vitest                        |
+| `api`         | Fixture builds 8 × 8 journeys; matching rules; case and whitespace folding; totals in whole cents; sort order; frozen result; error trigger; invalid parameters rejected                                    | Vitest                        |
+| hook          | The five states; stale response never shown                                                                                                                                                                 | Vitest, Testing Library       |
+| components    | Invalid submit shows the summary and focuses it; valid submit calls `onSearch`; URL on load renders each state; table text content                                                                          | Testing Library, `user-event` |
+| accessibility | No axe violations in each state and in the form with errors                                                                                                                                                 | `vitest-axe`                  |
+| end to end    | Empty form to results; invalid URL shows summary and never calls the API; origin `error` shows retry; the same three at 375 px                                                                              | Playwright                    |
 
 Conventions: tests co-located as `*.test.ts(x)`; queries by role and label only, never test ids; interactions through `user-event`; no snapshots; `it.each` tables for rules; the mock injected through `ApiProvider` with `createSearchJourneys({ delayMs: 0, now })` rather than `vi.mock`; fake timers only where the delay itself is under test; coverage thresholds of 100 % on `model`, `api` and `shared/lib`, none on `ui`. Every bug found during development gets a failing test first.
 
