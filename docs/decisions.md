@@ -92,7 +92,7 @@ A final pass over the whole design. Adopted: form defaults (passengers 1, date t
 
 ## 17 · Stretch: polish (17 Oct 2026, gated)
 
-A swap button between origin and destination, and dark mode through a `prefers-color-scheme` block over the tokens.
+A swap button between origin and destination, and dark mode through a `prefers-color-scheme` block over the tokens. Dark mode was built on 18 Oct 2026: the same fourteen token names redefined once, every text, border and focus pair re-checked against WCAG AA (the tightest is the input border at 5.3:1 against a 3:1 requirement), `color-scheme` set so the native date picker follows, and no component aware of the mode. The swap button stays gated.
 
 ## 18 · Commit message linting (17 Oct 2026)
 
