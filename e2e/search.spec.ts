@@ -24,6 +24,9 @@ test("searches from an empty form to a results table", async ({ page }) => {
   await expect(page.getByRole("status")).toHaveText("2 journeys found");
   await expect(page.getByRole("row")).toHaveCount(3);
   await expect(page).toHaveTitle("Enschede to Hengelo | Train journeys");
+  await expect(
+    page.getByRole("region", { name: "Search results" }),
+  ).toBeFocused();
 });
 
 test("shows the field error for an invalid URL and does not search", async ({

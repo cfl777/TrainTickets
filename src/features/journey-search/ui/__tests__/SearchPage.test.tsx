@@ -63,6 +63,9 @@ describe("SearchPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("2 journeys found");
     expect(document.title).toBe("Enschede to Hengelo | Train journeys");
+    expect(
+      screen.getByRole("region", { name: "Search results" }),
+    ).not.toHaveFocus();
     expect(await axe(container)).toHaveNoViolations();
   });
 
@@ -124,5 +127,8 @@ describe("SearchPage", () => {
     await screen.findByRole("table");
     expect(screen.getByRole("status")).toHaveTextContent("2 journeys found");
     expect(screen.getByLabelText("Origin")).toHaveValue("Enschede");
+    expect(
+      screen.getByRole("region", { name: "Search results" }),
+    ).toHaveFocus();
   });
 });

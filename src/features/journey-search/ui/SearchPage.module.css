@@ -3,3 +3,13 @@
   font-size: 0.9375rem;
   color: var(--color-text-muted);
 }
+
+/* Focused by script after a search; no ring, the status text is the cue. */
+.results:focus {
+  outline: none;
+}
+
+.results:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
