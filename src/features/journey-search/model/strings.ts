@@ -36,5 +36,30 @@ export function resultsCaption(parts: {
   return `${parts.origin} to ${parts.destination} on ${parts.date}, ${String(parts.passengers)} ${noun}`;
 }
 
+/** Copy of the results area: status messages, table headings, retry. */
+export const resultStrings = {
+  searching: "Searching for journeys",
+  found: (count: number): string =>
+    count === 1 ? "1 journey found" : `${String(count)} journeys found`,
+  none: "No journeys found for this search",
+  retry: "Try again",
+  tableRegion: "Journey results",
+  columns: {
+    departure: "Departure",
+    arrival: "Arrival",
+    duration: "Duration",
+    price: (passengers: number): string =>
+      passengers === 1
+        ? "Total for 1 passenger"
+        : `Total for ${String(passengers)} passengers`,
+  },
+} as const;
+
+/** Document titles: the search in the tab, the app name alone when idle. */
+export const appTitle = "Train journeys";
+export function searchTitle(origin: string, destination: string): string {
+  return `${origin} to ${destination} | ${appTitle}`;
+}
+
 export const searchErrorMessage =
   "Something went wrong while searching for journeys.";
