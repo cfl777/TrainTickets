@@ -66,7 +66,7 @@ src/
   main.tsx                          mount; StrictMode in development
   app/
     App.tsx
-    providers.tsx                   QueryClientProvider, ApiProvider
+    providers.tsx                   QueryClientProvider, ApiProvider with the real API, devtools in development
   features/
     journey-search/
       api/                          the mock; no React
@@ -81,6 +81,7 @@ src/
         duration.ts                 journeyDuration(journey) → minutes
         toJourneyRows.ts            view model: Journey → formatted row with id
         strings.ts                  all UI copy
+        useSearchApi.tsx         ApiProvider and useSearchApi: inject SearchJourneys
         useJourneySearch.ts         parse → validate → useQuery → rows; returns a union
         __tests__/
       ui/                           presentational components + the page
@@ -92,7 +93,7 @@ src/
         ErrorMessage.tsx
         JourneyTable.tsx (+ .module.css)
         __tests__/
-      index.ts                      public surface: export { SearchPage }
+      index.ts                      public surface: SearchPage, ApiProvider, searchJourneys
   shared/
     lib/
       format.ts                     formatTime, formatDuration, formatPrice (locales param)

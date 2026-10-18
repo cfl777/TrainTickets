@@ -85,7 +85,7 @@ export default defineConfig([
   {
     files: ["src/features/*/model/**"],
     ignores: [
-      "src/features/*/model/use*.ts",
+      "src/features/*/model/use*.{ts,tsx}",
       "src/features/*/model/**/*.test.tsx",
     ],
     rules: {
@@ -99,7 +99,7 @@ export default defineConfig([
     },
   },
   {
-    files: ["src/features/*/model/use*.ts"],
+    files: ["src/features/*/model/use*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": ["error", { patterns: ["**/ui/**"] }],
     },
@@ -122,7 +122,18 @@ export default defineConfig([
   {
     files: ["src/app/**", "src/main.tsx"],
     rules: {
-      "no-restricted-imports": ["error", { patterns: ["**/features/*/*"] }],
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              // app reaches a feature only through its public index.
+              group: ["**/features/*/*", "!**/features/*/index.ts"],
+              message: "app imports a feature only through its index.ts.",
+            },
+          ],
+        },
+      ],
     },
   },
 
