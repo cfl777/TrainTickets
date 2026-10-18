@@ -42,6 +42,7 @@ export type JourneySearchState =
       readonly rows: readonly JourneyRow[];
       readonly caption: string;
       readonly count: number;
+      readonly passengers: number;
     }
   | {
       readonly kind: "error";
@@ -132,6 +133,7 @@ export function useJourneySearch(
       raw,
       rows,
       count: rows.length,
+      passengers: resolved.params.nrOfPassengers,
       caption: resultsCaption({
         origin: resolved.params.origin,
         destination: resolved.params.destination,
