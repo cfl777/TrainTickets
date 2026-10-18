@@ -48,6 +48,10 @@ export default defineConfig([
         { allowInterfaces: "with-single-extends" },
       ],
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+      // A scrollable region must be keyboard focusable (axe:
+      // scrollable-region-focusable); role="region" with a name is the
+      // documented way to make the tabindex legitimate.
+      "jsx-a11y/no-noninteractive-tabindex": ["error", { roles: ["region"] }],
     },
   },
 
@@ -106,6 +110,8 @@ export default defineConfig([
   },
   {
     files: ["src/features/*/ui/**"],
+    // Tests compose the tree the way the app does: providers and a mock API.
+    ignores: ["src/features/*/ui/**/*.test.tsx"],
     rules: {
       "no-restricted-imports": [
         "error",
