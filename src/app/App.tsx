@@ -1,12 +1,14 @@
+import { ErrorBoundary } from "../shared/ui/ErrorBoundary.tsx";
+import { SearchPage } from "../features/journey-search/index.ts";
 import { Providers } from "./providers.tsx";
 
 function App() {
   return (
-    <Providers>
-      <main>
-        <h1>Train journeys</h1>
-      </main>
-    </Providers>
+    <ErrorBoundary>
+      <Providers>
+        <SearchPage />
+      </Providers>
+    </ErrorBoundary>
   );
 }
 
