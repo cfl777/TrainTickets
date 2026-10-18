@@ -87,7 +87,7 @@ src/
       ui/                           presentational components + the page
         SearchPage.tsx              composition only
         SearchForm.tsx (+ .module.css)
-        ErrorSummary.tsx
+        ErrorSummary.tsx (+ .module.css)
         SearchResults.tsx
         StatusMessage.tsx (+ .module.css)
         ErrorMessage.tsx
@@ -156,7 +156,7 @@ The form:
 
 Validation feedback, following the GOV.UK and NL Design System form patterns:
 
-- On submit, all fields are checked at once. If any fail, an error summary renders at the top with `role="alert"`, a heading and one link per error that focuses its field; focus moves to the summary; each message also appears inline under its field with `aria-describedby` and `aria-invalid="true"`.
+- On submit, all fields are checked at once. If any fail, an error summary renders at the top with `role="alert"`, a heading and one link per error that focuses its field; focus moves to the summary; each message also appears inline with its field, between the hint and the control as in the GOV.UK pattern, with `aria-describedby` and `aria-invalid="true"`.
 - After the first failed submit, each errored field re-validates on change and clears its own message once valid. Before the first submit nothing nags.
 - No success ticks on valid fields. Success is the search starting.
 - When the page loads with an invalid URL, the same summary shows with the form pre-filled; action-state errors take precedence over URL errors when both exist.
@@ -264,7 +264,7 @@ Tooling: `eslint-plugin-jsx-a11y` in lint; `vitest-axe` runs axe-core over every
 | Keyboard-only walkthrough of all states        | _to be filled in_ |       |
 | Screen reader walkthrough with NVDA on Windows | _to be filled in_ |       |
 
-Known limitation: the native date input's screen-reader announcements vary by browser. It is accessible in all major ones; the label and a format hint cover the gap.
+Known limitation: the native date input's screen-reader announcements vary by browser. It is accessible in all major ones; the label and the hint cover the gap.
 
 ## Security
 
