@@ -320,7 +320,7 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 - `knip` in CI with zero findings required.
 - StrictMode on in development, which double-invokes effects and proves the hooks are idempotent.
 - CI: job 1 runs lint, format check, typecheck, knip, unit tests in both time zones, build with size check; job 2 runs Playwright desktop and mobile.
-- Hosted preview: Vercel, linked to the GitHub repository (decision 21). `main` deploys to https://train-journeys.vercel.app with `pnpm build`, Node 24 and the pnpm from `packageManager`; each pull request gets a preview deployment as a GitHub check. No `vercel.json`: one route, static output in `dist/`, every setting is a project default.
+- Hosted preview: Vercel, linked to the GitHub repository (decision 21). `main` deploys to https://train-journeys.vercel.app with `pnpm build`, Node 24 and the pnpm from `packageManager`; preview deployments are switched off, so nothing else is deployed. No `vercel.json`: one route, static output in `dist/`, the build command and output directory set to the framework defaults.
 
 ## Dependencies
 
