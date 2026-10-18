@@ -29,6 +29,19 @@ export function formatTime(date: Date, locales: Locales): string {
   return formatter.format(date);
 }
 
+const dateFormatters = new Map<string, Intl.DateTimeFormat>();
+
+/** The full calendar date in the locale, e.g. woensdag 21 oktober 2026. */
+export function formatDate(date: Date, locales: Locales): string {
+  const key = cacheKey(locales);
+  let formatter = dateFormatters.get(key);
+  if (formatter === undefined) {
+    formatter = new Intl.DateTimeFormat(locales, { dateStyle: "full" });
+    dateFormatters.set(key, formatter);
+  }
+  return formatter.format(date);
+}
+
 const priceFormatters = new Map<string, Intl.NumberFormat>();
 
 /** The amount as currency in the locale's style, e.g. € 15,00 or €15.00. */
