@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import { expect, test } from "@playwright/test";
 
 /** Tomorrow as yyyy-mm-dd in this machine's zone; the browser runs in the same zone. */
@@ -86,4 +87,42 @@ test("focuses the first invalid station field when the URL has an error on load"
   const origin = page.getByRole("combobox", { name: "Origin" });
   await expect(origin).toBeFocused();
   await expect(origin).toHaveAttribute("aria-invalid", "true");
+});
+
+test("keeps the stub's route line inside the card, also at a large font size", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Train journeys" }),
+  ).toBeVisible();
+  // Pixels the page scrolls sideways, and pixels the decorative route line
+  // runs past the card's right edge; both must stay at or below zero.
+  const measure = () =>
+    page.evaluate(() => {
+      const heading = document.querySelector("search h1");
+      const card = heading?.closest("search")?.firstElementChild;
+      const route = heading?.nextElementSibling;
+      if (!card || !route) {
+        throw new Error("ticket stub not found");
+      }
+      return {
+        pageOverflow: document.documentElement.scrollWidth - window.innerWidth,
+        routeOverflow:
+          route.getBoundingClientRect().right -
+          card.getBoundingClientRect().right,
+      };
+    });
+
+  const normal = await measure();
+  expect(normal.pageOverflow).toBeLessThanOrEqual(0);
+  expect(normal.routeOverflow).toBeLessThanOrEqual(0);
+
+  // A browser text-size setting scales the root font; 150 % is a common one.
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = "150%";
+  });
+  const large = await measure();
+  expect(large.pageOverflow).toBeLessThanOrEqual(0);
+  expect(large.routeOverflow).toBeLessThanOrEqual(0);
 });

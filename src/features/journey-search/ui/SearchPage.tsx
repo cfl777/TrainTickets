@@ -74,11 +74,15 @@ export function SearchPage() {
           <div className={styles.stub}>
             <h1>{appTitle}</h1>
             <p className={styles.route} aria-hidden="true">
-              <span className={styles.dot} />{" "}
-              <span>{formStrings.ticket.from}</span>
+              <span className={styles.stop}>
+                <span className={styles.dot} />{" "}
+                <span>{formStrings.ticket.from}</span>
+              </span>
               <span className={styles.line} />
-              <span className={[styles.dot, styles.dotTo].join(" ")} />{" "}
-              <span>{formStrings.ticket.to}</span>
+              <span className={styles.stop}>
+                <span className={[styles.dot, styles.dotTo].join(" ")} />{" "}
+                <span>{formStrings.ticket.to}</span>
+              </span>
             </p>
           </div>
           <div className={styles.perforation} aria-hidden="true" />
