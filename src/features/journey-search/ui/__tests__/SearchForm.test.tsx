@@ -1,78 +1,98 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
+import { createSearchJourneys } from "../../api/searchJourneys.ts";
+import { createSuggestStations } from "../../api/stations.ts";
+import { ApiProvider } from "../../model/useSearchApi.tsx";
 import { SearchForm } from "../SearchForm.tsx";
+// Imported once so the lazy import inside StationField resolves at once instead of
+// loading react-aria-components mid-test.
+import "../StationComboBox.tsx";
 
 const now = () => new Date(2026, 9, 20, 15, 30);
 
-function renderForm(props: Partial<Parameters<typeof SearchForm>[0]> = {}) {
+/** Renders inside the providers the station lookup needs and waits for both comboboxes to replace their fallbacks. */
+async function renderForm(
+  props: Partial<Parameters<typeof SearchForm>[0]> = {},
+) {
   const onSearch = vi.fn();
   const utils = render(
-    <SearchForm
-      defaultValues={null}
-      initialErrors={null}
-      onSearch={onSearch}
-      now={now}
-      {...props}
-    />,
+    <QueryClientProvider client={new QueryClient()}>
+      <ApiProvider
+        api={createSearchJourneys({ delayMs: 0 })}
+        suggest={createSuggestStations({ delayMs: 0 })}
+      >
+        <SearchForm
+          defaultValues={null}
+          initialErrors={null}
+          onSearch={onSearch}
+          now={now}
+          {...props}
+        />
+      </ApiProvider>
+    </QueryClientProvider>,
   );
+  await screen.findByRole("combobox", { name: "Origin" });
+  await screen.findByRole("combobox", { name: "Destination" });
   return { ...utils, onSearch, user: userEvent.setup() };
 }
 
+const origin = () => screen.getByRole("combobox", { name: "Origin" });
+const destination = () => screen.getByRole("combobox", { name: "Destination" });
+const submit = () => screen.getByRole("button", { name: "Search journeys" });
+
+// While a lookup popup is open, React Aria hides the rest of the page from
+// assistive tech, as a screen reader expects; typing ends with Escape so the
+// next query can see the other controls, the way a visitor's click would.
+const typed = (text: string) => `${text}{Escape}`;
+
 describe("SearchForm", () => {
-  it("defaults to tomorrow and one passenger, with today as the earliest date", () => {
-    renderForm();
+  it("defaults to tomorrow and one passenger, with today as the earliest date", async () => {
+    await renderForm();
     expect(screen.getByLabelText("Travel date")).toHaveValue("2026-10-21");
     expect(screen.getByLabelText("Travel date")).toHaveAttribute(
       "min",
       "2026-10-20",
     );
     expect(screen.getByLabelText("Passengers")).toHaveValue(1);
-    expect(
-      screen.getByRole("button", { name: "Search journeys" }),
-    ).toBeEnabled();
+    expect(submit()).toBeEnabled();
   });
 
-  it("turns native validation bubbles off", () => {
-    const { container } = renderForm();
+  it("turns native validation bubbles off", async () => {
+    const { container } = await renderForm();
     expect(container.querySelector("form")).toHaveAttribute("novalidate");
   });
 
   it("marks the fields, announces the count and focuses the first invalid field on an invalid submit", async () => {
-    const { user, onSearch } = renderForm();
-    await user.click(screen.getByRole("button", { name: "Search journeys" }));
+    const { user, onSearch } = await renderForm();
+    await user.click(submit());
 
     expect(screen.getByRole("alert")).toHaveTextContent(
       "2 fields need attention",
     );
-    expect(screen.getByLabelText("Origin")).toHaveFocus();
-    expect(screen.getByLabelText("Origin")).toHaveAttribute(
-      "aria-invalid",
-      "true",
-    );
-    expect(screen.getByLabelText("Origin")).toHaveAccessibleDescription(
-      "Enter an origin",
-    );
+    expect(origin()).toHaveFocus();
+    expect(origin()).toHaveAttribute("aria-invalid", "true");
+    expect(origin()).toHaveAccessibleDescription("Enter an origin");
     expect(screen.getByText("Enter a destination")).toBeInTheDocument();
     expect(onSearch).not.toHaveBeenCalled();
   });
 
   it("refocuses the first invalid field on a repeated failed submit", async () => {
-    const { user } = renderForm();
-    const button = screen.getByRole("button", { name: "Search journeys" });
-    await user.click(button);
+    const { user } = await renderForm();
+    await user.click(submit());
     await user.click(screen.getByLabelText("Passengers"));
-    expect(screen.getByLabelText("Origin")).not.toHaveFocus();
-    await user.click(button);
-    expect(screen.getByLabelText("Origin")).toHaveFocus();
+    expect(origin()).not.toHaveFocus();
+    await user.click(submit());
+    expect(origin()).toHaveFocus();
   });
 
   it("calls onSearch with the validated parameters and announces nothing", async () => {
-    const { user, onSearch } = renderForm();
-    await user.type(screen.getByLabelText("Origin"), " Enschede ");
-    await user.type(screen.getByLabelText("Destination"), "Hengelo");
-    await user.click(screen.getByRole("button", { name: "Search journeys" }));
+    const { user, onSearch } = await renderForm();
+    await user.type(origin(), typed(" Enschede "));
+    await user.type(destination(), typed("Hengelo"));
+    await user.click(submit());
 
     expect(onSearch).toHaveBeenCalledWith({
       origin: "Enschede",
@@ -83,55 +103,71 @@ describe("SearchForm", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
+  it("submits a station chosen from the lookup", async () => {
+    const { user, onSearch } = await renderForm();
+    await user.type(origin(), "en");
+    await screen.findByRole("option", { name: "Enschede" });
+    await user.keyboard("{ArrowDown}{Enter}");
+    expect(origin()).toHaveValue("Enschede");
+
+    await user.type(destination(), "al");
+    await user.click(await screen.findByRole("option", { name: "Almelo" }));
+    await user.click(submit());
+
+    expect(onSearch).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: "Enschede", destination: "Almelo" }),
+    );
+  });
+
   it("keeps what was typed after a failed submit", async () => {
-    const { user } = renderForm();
-    await user.type(screen.getByLabelText("Origin"), "Enschede");
-    await user.click(screen.getByRole("button", { name: "Search journeys" }));
-    expect(screen.getByLabelText("Origin")).toHaveValue("Enschede");
+    const { user } = await renderForm();
+    await user.type(origin(), typed("Enschede"));
+    await user.click(submit());
+    expect(origin()).toHaveValue("Enschede");
   });
 
   it("clears a field's message once it is valid, and only that field's", async () => {
-    const { user } = renderForm();
-    await user.click(screen.getByRole("button", { name: "Search journeys" }));
-    await user.type(screen.getByLabelText("Origin"), "Enschede");
+    const { user } = await renderForm();
+    await user.click(submit());
+    await user.type(origin(), "Enschede");
 
     expect(screen.queryByText("Enter an origin")).not.toBeInTheDocument();
     expect(screen.getByText("Enter a destination")).toBeInTheDocument();
-    expect(screen.getByLabelText("Origin")).not.toHaveAttribute("aria-invalid");
+    expect(origin()).not.toHaveAttribute("aria-invalid");
   });
 
   it("does not nag before the first submit", async () => {
-    const { user } = renderForm();
-    await user.type(screen.getByLabelText("Origin"), "E");
-    await user.clear(screen.getByLabelText("Origin"));
+    const { user } = await renderForm();
+    await user.type(origin(), "E");
+    await user.clear(origin());
     expect(screen.queryByText("Enter an origin")).not.toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("rejects the same origin and destination on the destination field", async () => {
-    const { user } = renderForm();
-    await user.type(screen.getByLabelText("Origin"), "Enschede");
-    await user.type(screen.getByLabelText("Destination"), "enschede");
-    await user.click(screen.getByRole("button", { name: "Search journeys" }));
+    const { user } = await renderForm();
+    await user.type(origin(), typed("Enschede"));
+    await user.type(destination(), typed("enschede"));
+    await user.click(submit());
     expect(
       screen.getByText("Destination must differ from origin"),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText("Destination")).toHaveFocus();
+    expect(destination()).toHaveFocus();
   });
 
   it("rejects passengers out of range", async () => {
-    const { user } = renderForm();
+    const { user } = await renderForm();
     const passengers = screen.getByLabelText("Passengers");
     await user.clear(passengers);
     await user.type(passengers, "11");
-    await user.click(screen.getByRole("button", { name: "Search journeys" }));
+    await user.click(submit());
     expect(
       screen.getByText("Choose between 1 and 10 passengers"),
     ).toBeInTheDocument();
   });
 
-  it("pre-fills from the URL and shows its errors on load", () => {
-    renderForm({
+  it("pre-fills from the URL and shows its errors on load", async () => {
+    await renderForm({
       defaultValues: {
         origin: "Enschede",
         destination: "Hengelo",
@@ -140,7 +176,7 @@ describe("SearchForm", () => {
       },
       initialErrors: { date: "Choose a date from today onwards" },
     });
-    expect(screen.getByLabelText("Origin")).toHaveValue("Enschede");
+    expect(origin()).toHaveValue("Enschede");
     expect(screen.getByLabelText("Travel date")).toHaveValue("2025-04-20");
     expect(screen.getByLabelText("Passengers")).toHaveValue(2);
     expect(screen.getByLabelText("Travel date")).toHaveFocus();
@@ -153,9 +189,9 @@ describe("SearchForm", () => {
   });
 
   it("has no accessibility violations before and after a failed submit", async () => {
-    const { container, user } = renderForm();
+    const { container, user } = await renderForm();
     expect(await axe(container)).toHaveNoViolations();
-    await user.click(screen.getByRole("button", { name: "Search journeys" }));
+    await user.click(submit());
     expect(await axe(container)).toHaveNoViolations();
   });
 });

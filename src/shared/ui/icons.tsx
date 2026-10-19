@@ -1,7 +1,7 @@
 /**
  * Decorative inline icons for form controls. Goals:
  *
- * - No icon dependency: three 24-unit outline paths (shapes after the
+ * - No icon dependency: four 24-unit outline paths (shapes after the
  *   MIT-licensed Tabler set), inlined and drawn with currentColor.
  * - Always decorative: aria-hidden, focusable="false"; the control's label
  *   carries the meaning.
@@ -48,6 +48,14 @@ export function UsersIcon() {
       <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
       <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon() {
+  return (
+    <svg {...base}>
+      <path d="M6 9l6 6l6 -6" />
     </svg>
   );
 }

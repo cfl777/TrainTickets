@@ -73,6 +73,7 @@ src/
         timetable.ts                8 services: origin, destination, sourceDate, times, unitPriceCents
         fixtures.ts                 buildJourneys(timetable, now) → Journey[] for days +1..+8
         searchJourneys.ts           the given signature; filterJourneys + createSearchJourneys
+        stations.ts                 the lookup: matchStations (prefix) + createSuggestStations
         __tests__/
       model/                        pure rules + the one React Query hook
         types.ts                    the brief's types verbatim; ValidJourneyParameters (branded)
@@ -81,18 +82,21 @@ src/
         duration.ts                 journeyDuration(journey) → minutes
         toJourneyRows.ts            view model: Journey → formatted row with id
         strings.ts                  all UI copy
-        useSearchApi.tsx         ApiProvider and useSearchApi: inject SearchJourneys
+        useSearchApi.tsx            ApiProvider, useSearchApi, useSuggestStations: inject the two API functions
         useJourneySearch.ts         parse → validate → useQuery → rows; returns a union
+        useStationSuggestions.ts    useQuery per normalised prefix; previous list kept while loading
         __tests__/
       ui/                           presentational components + the page
         SearchPage.tsx              composition only
         SearchForm.tsx (+ .module.css)
+        StationField.tsx            lazy boundary: plain input until the combobox chunk arrives
+        StationComboBox.tsx (+ .module.css)  React Aria combobox; the only module importing the library
         SearchResults.tsx
         StatusMessage.tsx (+ .module.css)
         ErrorMessage.tsx
         JourneyTable.tsx (+ .module.css)
         __tests__/
-      index.ts                      public surface: SearchPage, ApiProvider, searchJourneys
+      index.ts                      public surface: SearchPage, ApiProvider, searchJourneys, suggestStations
   shared/
     lib/
       format.ts                     formatTime, formatDuration, formatPrice (locales param)
@@ -102,6 +106,7 @@ src/
       useSearchParams.ts            URL ↔ state: pushState, popstate
     ui/
       Field.tsx                     label + control + hint + error wiring
+      icons.tsx                     four inline SVG paths
       ErrorBoundary.tsx
     styles/
       tokens.css                    custom properties: colour, spacing, breakpoints
@@ -127,7 +132,7 @@ The given `SearchJourneys`, `JourneyParameters`, `Journeys`, `Journey` and `Amou
 - `filterJourneys(journeys, parameters)` is pure and synchronous: origin and destination compared with `Intl.Collator` at base sensitivity after trimming; date compared on the local calendar day of departure; price is `unitPriceCents × nrOfPassengers`, divided by 100 once; sorted by departure ascending; returned frozen to honour `ReadonlyArray`.
 - The async wrapper adds the delay (about 500 ms by default) and two typed errors: `InvalidParametersError` when the API's own check fails, and `SearchError` when the origin is `error`. The UI shows both as the error state; tests tell them apart.
 
-Prefix and fuzzy matching are deliberately absent. In production rail systems a typed name is resolved to a station in a separate lookup step and the journey search is exact. A `suggestStations` lookup with an accessible combobox is a gated stretch item.
+Prefix and fuzzy matching are deliberately absent from the search. In production rail systems a typed name is resolved to a station in a separate lookup step and the journey search is exact. That lookup is `suggestStations`, the default instance of `createSuggestStations({ delayMs })` (about 150 ms): the station list is derived from the timetable, and `matchStations(query)` returns the stations whose name starts with the trimmed query, compared with the same collator the search uses; an empty query lists every station. Both API functions are injected together through `ApiProvider`.
 
 The timetable carries no station time zone; a 09:00 departure is built in the browser's zone. See assumption 8.
 
@@ -207,7 +212,9 @@ App
       ├─ <search>             HTML landmark
       │  └─ SearchForm        useActionState; props: defaultValues, initialErrors, onSearch
       │     ├─ (hidden alert)  "N fields need attention" after a failed submit
-      │     └─ Field × 4      shared/ui; label + control + hint + error wiring
+      │     ├─ StationField × 2  Suspense around a lazy StationComboBox; a plain Field meanwhile
+      │     │  └─ StationComboBox  React Aria ComboBox: input (id, name), toggle, popover with the matches
+      │     └─ Field × 2      shared/ui; label + control + hint + error wiring
       └─ SearchResults        props: the union; aria-busy while loading
          ├─ StatusMessage     role="status", always mounted
          ├─ ErrorMessage      role="alert", only on error; message + Try again; takes focus
@@ -216,11 +223,13 @@ App
 
 - `SearchPage` is a layout. The hook does the work.
 - `SearchForm` never pushes history; it reports valid parameters through `onSearch`. Its tests need no URL.
-- After a failed submit the first invalid field is focused, keyed on an attempt counter from the action state, so a repeat failure with identical errors refocuses too.
+- After a failed submit the first invalid field is focused, keyed on an attempt counter from the action state, so a repeat failure with identical errors refocuses too. The two station fields are keyed on the same counter: React resets the form after an action, which would clear the combobox text, so they re-mount with the submitted values instead.
+- `StationComboBox` keeps the form contract of the input it replaced: the same id (so the form can focus it), the same name (the typed or chosen text is what FormData reads, through `allowsCustomValue`), and the field's own validation message passed in as its error. React Aria supplies the combobox roles, keyboard handling, the live announcement of the number of options and the popover; the typed prefix is shown in bold and the station count under the list. While a popup is open React Aria hides the rest of the page from assistive technology, as a screen reader expects of a listbox popup; tests close it with Escape before reaching for other controls.
+- `StationField` is the lazy boundary. The combobox chunk is requested when the form first renders; until it arrives the field is the plain `Field` input with the same id, name, label and error, and whatever was typed or focused in it is handed to the combobox on mount.
 - Two live regions: polite status for loading, counts and no results; alert for errors. Switching `role` on a mounted element is unreliable across screen readers.
 - `Field` generates ids and sets `aria-describedby` and `aria-invalid` once, not four times; it takes an optional decorative icon.
 - `JourneyTable` contains no `Intl` call and no arithmetic. Four columns: Departure, Arrival, Duration, "Total for N passengers". Origin, destination and date are in the visible caption. Row ids come from the view model (composite of departure, arrival and price plus index).
-- No component library: every control is native. Headless libraries earn their place on dialogs, menus, comboboxes and custom date pickers; this page has none. React Aria Components is the route if a combobox or date picker is ever needed.
+- One headless library, for the one control that earns it: the station combobox comes from React Aria Components (decision 23); every other control is native. Headless libraries earn their place on dialogs, menus, comboboxes and custom date pickers, and the date input stays native.
 - CSS Modules with modern CSS; tokens as custom properties in `shared/styles/tokens.css`; no runtime styling. The look is a "ticket": an off-white page, the form as a white card with a teal edge, result rows as spaced white cards that remain table rows, prices in a tinted pill. Depth comes from tone, never shadows.
 
 ## Responsive
@@ -283,6 +292,7 @@ The brief asks that no invalid or insecure request reaches the search API. The A
 | Measure                      | Budget                                                                                                  | How                                           |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
 | Initial JavaScript           | under 100 KB gzipped (expected about 70: React and DOM about 45, TanStack Query about 13, app about 10) | `pnpm build` output and the size-check script |
+| Station lookup chunk         | under 70 KB gzipped, loaded on demand after the first render                                            | a second size-limit entry                     |
 | Lighthouse performance       | 95 or above, mobile and desktop                                                                         | recorded in the README                        |
 | Layout shift on state change | 0                                                                                                       | reserved results height                       |
 | Input delay                  | none from React                                                                                         | uncontrolled inputs                           |
@@ -291,7 +301,7 @@ The brief asks that no invalid or insecure request reaches the search API. The A
 
 Formatters are created once per locale. Stale responses are never rendered. Vite's default modern browser target, no legacy plugin.
 
-Deliberately not done, and when it would be: memoisation, when a profile shows wasted renders; virtualised rows, past a few hundred results; code splitting, when there is a second route; image optimisation, when there is an image; React Compiler, when there is something to memoise.
+Deliberately not done, and when it would be: memoisation, when a profile shows wasted renders; virtualised rows, past a few hundred results; further code splitting, when there is a second route (the one split today is the station combobox, which would otherwise take the initial bundle past its budget); image optimisation, when there is an image; React Compiler, when there is something to memoise.
 
 ## Testing
 
@@ -323,22 +333,23 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 
 ## Dependencies
 
-| Package                                                                                                                                                             | Role    | Motivation                                                                                           |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
-| `react`, `react-dom`                                                                                                                                                | runtime | Required by the brief                                                                                |
-| `@tanstack/react-query`                                                                                                                                             | runtime | Server state: stale-response safety, URL-keyed cache, declarative states                             |
-| `typescript`, `vite`, `@vitejs/plugin-react`                                                                                                                        | dev     | Strict types; the standard client-only React build                                                   |
-| `vitest` (with `@vitest/coverage-v8`), `jsdom`                                                                                                                      | dev     | Test runner native to Vite                                                                           |
-| `@testing-library/react` (with its `@testing-library/dom` peer), `@testing-library/user-event`, `@testing-library/jest-dom`                                         | dev     | Tests through roles and labels; realistic interactions; readable DOM matchers                        |
-| `vitest-axe`                                                                                                                                                        | dev     | axe-core in every component test                                                                     |
-| `@playwright/test`                                                                                                                                                  | dev     | Three real-browser tests and a mobile viewport                                                       |
-| `eslint` (with `@eslint/js`), `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, `@tanstack/eslint-plugin-query`, `eslint-config-prettier` | dev     | Type-aware lint, hook rules, static accessibility, query-key correctness, no conflicts with Prettier |
-| `prettier`                                                                                                                                                          | dev     | Formatting without debate                                                                            |
-| `lint-staged`, `simple-git-hooks`                                                                                                                                   | dev     | Pre-commit formatting and lint on staged files                                                       |
-| `@commitlint/cli`, `@commitlint/config-conventional`                                                                                                                | dev     | Rejects commit messages that are not Conventional Commits, so the history reads as documentation     |
-| `knip`                                                                                                                                                              | dev     | Finds unused files, exports and dependencies                                                         |
-| `size-limit`, `@size-limit/file`                                                                                                                                    | dev     | Enforces the 100 kB gzipped JavaScript budget on every build                                         |
-| `@tanstack/react-query-devtools`                                                                                                                                    | dev     | Visible cache in development only                                                                    |
+| Package                                                                                                                                                             | Role    | Motivation                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `react`, `react-dom`                                                                                                                                                | runtime | Required by the brief                                                                                 |
+| `@tanstack/react-query`                                                                                                                                             | runtime | Server state: stale-response safety, URL-keyed cache, declarative states                              |
+| `react-aria-components`                                                                                                                                             | runtime | The station combobox: roles, keyboard handling, announcements and popover placement; loaded on demand |
+| `typescript`, `vite`, `@vitejs/plugin-react`                                                                                                                        | dev     | Strict types; the standard client-only React build                                                    |
+| `vitest` (with `@vitest/coverage-v8`), `jsdom`                                                                                                                      | dev     | Test runner native to Vite                                                                            |
+| `@testing-library/react` (with its `@testing-library/dom` peer), `@testing-library/user-event`, `@testing-library/jest-dom`                                         | dev     | Tests through roles and labels; realistic interactions; readable DOM matchers                         |
+| `vitest-axe`                                                                                                                                                        | dev     | axe-core in every component test                                                                      |
+| `@playwright/test`                                                                                                                                                  | dev     | Three real-browser tests and a mobile viewport                                                        |
+| `eslint` (with `@eslint/js`), `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, `@tanstack/eslint-plugin-query`, `eslint-config-prettier` | dev     | Type-aware lint, hook rules, static accessibility, query-key correctness, no conflicts with Prettier  |
+| `prettier`                                                                                                                                                          | dev     | Formatting without debate                                                                             |
+| `lint-staged`, `simple-git-hooks`                                                                                                                                   | dev     | Pre-commit formatting and lint on staged files                                                        |
+| `@commitlint/cli`, `@commitlint/config-conventional`                                                                                                                | dev     | Rejects commit messages that are not Conventional Commits, so the history reads as documentation      |
+| `knip`                                                                                                                                                              | dev     | Finds unused files, exports and dependencies                                                          |
+| `size-limit`, `@size-limit/file`                                                                                                                                    | dev     | Enforces the 100 kB gzipped budget on the initial JavaScript and a 70 kB budget on the lookup chunk   |
+| `@tanstack/react-query-devtools`                                                                                                                                    | dev     | Visible cache in development only                                                                     |
 
 ## Considered and not adopted
 
@@ -361,6 +372,6 @@ Evergreen browsers, last two versions, matching Vite's default target. The one n
 
 Gated behind the core being implemented, tested and documented.
 
-1. Station lookup: a `suggestStations` mock with normalised prefix matching and an accessible combobox (React Aria Components), showing the lookup-versus-search separation in code.
+1. Station lookup: built (decision 23). A `suggestStations` mock with normalised prefix matching and a React Aria combobox, loaded on demand, showing the lookup-versus-search separation in code.
 2. Earlier and later: the unit is the day, since the contract has no time. Either day navigation through the URL or appending adjacent days with `useInfiniteQuery`.
 3. Polish: a swap button between origin and destination; dark mode through a `prefers-color-scheme` block over the tokens.

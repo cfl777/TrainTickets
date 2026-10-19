@@ -14,8 +14,18 @@ test("searches from an empty form to a results table", async ({ page }) => {
     page.getByRole("heading", { level: 1, name: "Train journeys" }),
   ).toBeVisible();
 
-  await page.getByLabel("Origin").fill("Enschede");
-  await page.getByLabel("Destination").fill("Hengelo");
+  // The station fields are comboboxes once their chunk has loaded.
+  const origin = page.getByRole("combobox", { name: "Origin" });
+  await origin.pressSequentially("En");
+  await expect(page.getByRole("option", { name: "Enschede" })).toBeVisible();
+  await origin.press("ArrowDown");
+  await origin.press("Enter");
+  await expect(origin).toHaveValue("Enschede");
+  const destination = page.getByRole("combobox", { name: "Destination" });
+  await destination.fill("Hengelo");
+  // While a lookup popup is open the rest of the page is hidden from assistive
+  // tech, so role queries cannot see the button until the popup closes.
+  await destination.press("Escape");
   await page.getByRole("button", { name: "Search journeys" }).click();
 
   await expect(page).toHaveURL(/origin=Enschede&destination=Hengelo/);
@@ -43,7 +53,9 @@ test("shows the field error for an invalid URL and does not search", async ({
     "aria-invalid",
     "true",
   );
-  await expect(page.getByLabel("Origin")).toHaveValue("Enschede");
+  await expect(page.getByRole("combobox", { name: "Origin" })).toHaveValue(
+    "Enschede",
+  );
   await expect(page.getByRole("status")).toHaveText("");
   await expect(page.getByRole("table")).toHaveCount(0);
 });

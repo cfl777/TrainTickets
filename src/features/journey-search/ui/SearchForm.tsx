@@ -17,14 +17,15 @@
  *   the submitted values in state and the inputs read defaultValue from
  *   there first; a failed submit never wipes what was typed.
  * - Defaults: passengers 1, date tomorrow (assumption 7); min date today.
+ * - Origin and destination are StationFields: a lookup over the same
+ *   input contract (name, id, text value), so this file reads FormData
+ *   exactly as before. The lookup keeps its text in React state, which the
+ *   post-action reset would clear, so the two fields are keyed on the
+ *   attempt and re-mount with the submitted values instead.
  */
 import { useActionState, useEffect, useState, type ChangeEvent } from "react";
 import { Field } from "../../../shared/ui/Field.tsx";
-import {
-  CalendarIcon,
-  MapPinIcon,
-  UsersIcon,
-} from "../../../shared/ui/icons.tsx";
+import { CalendarIcon, UsersIcon } from "../../../shared/ui/icons.tsx";
 import {
   formatLocalDate,
   startOfLocalDay,
@@ -38,6 +39,7 @@ import {
   type ValidationErrors,
 } from "../model/validation.ts";
 import styles from "./SearchForm.module.css";
+import { StationField } from "./StationField.tsx";
 
 const FIELDS = [
   "origin",
@@ -183,48 +185,22 @@ export function SearchForm({
         </p>
       ) : null}
       <div className={styles.fields}>
-        <Field
+        <StationField
+          key={`origin-${String(state.attempt)}`}
           id="origin"
           label={formStrings.origin.label}
-          icon={<MapPinIcon />}
+          placeholder={formStrings.origin.placeholder}
+          defaultValue={value("origin") ?? ""}
           {...errorProp(shownErrors, "origin")}
-        >
-          {(control) => (
-            <input
-              {...control}
-              name="origin"
-              type="text"
-              required
-              maxLength={100}
-              defaultValue={value("origin") ?? ""}
-              placeholder={formStrings.origin.placeholder}
-              autoCapitalize="words"
-              spellCheck={false}
-              autoComplete="off"
-            />
-          )}
-        </Field>
-        <Field
+        />
+        <StationField
+          key={`destination-${String(state.attempt)}`}
           id="destination"
           label={formStrings.destination.label}
-          icon={<MapPinIcon />}
+          placeholder={formStrings.destination.placeholder}
+          defaultValue={value("destination") ?? ""}
           {...errorProp(shownErrors, "destination")}
-        >
-          {(control) => (
-            <input
-              {...control}
-              name="destination"
-              type="text"
-              required
-              maxLength={100}
-              defaultValue={value("destination") ?? ""}
-              placeholder={formStrings.destination.placeholder}
-              autoCapitalize="words"
-              spellCheck={false}
-              autoComplete="off"
-            />
-          )}
-        </Field>
+        />
         <Field
           id="date"
           label={formStrings.date.label}

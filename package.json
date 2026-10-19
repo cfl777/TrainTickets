@@ -37,14 +37,21 @@
   "size-limit": [
     {
       "name": "Initial JavaScript, gzipped",
-      "path": "dist/assets/*.js",
+      "path": "dist/assets/index-*.js",
       "limit": "100 kB",
+      "gzip": true
+    },
+    {
+      "name": "Station lookup chunk, gzipped, loaded on demand",
+      "path": "dist/assets/StationComboBox-*.js",
+      "limit": "70 kB",
       "gzip": true
     }
   ],
   "dependencies": {
     "@tanstack/react-query": "^5.104.4",
     "react": "^19.2.8",
+    "react-aria-components": "^1.22.1",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {

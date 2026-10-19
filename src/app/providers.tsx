@@ -13,6 +13,7 @@ import { lazy, Suspense, type ReactNode } from "react";
 import {
   ApiProvider,
   searchJourneys,
+  suggestStations,
 } from "../features/journey-search/index.ts";
 
 const queryClient = new QueryClient();
@@ -29,7 +30,9 @@ const Devtools =
 export function Providers({ children }: { readonly children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ApiProvider api={searchJourneys}>{children}</ApiProvider>
+      <ApiProvider api={searchJourneys} suggest={suggestStations}>
+        {children}
+      </ApiProvider>
       {Devtools === null ? null : (
         <Suspense fallback={null}>
           <Devtools />

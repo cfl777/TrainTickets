@@ -8,8 +8,12 @@ import {
   startOfLocalDay,
 } from "../../../../shared/lib/localDate.ts";
 import { createSearchJourneys } from "../../api/searchJourneys.ts";
+import { createSuggestStations } from "../../api/stations.ts";
 import { ApiProvider } from "../../model/useSearchApi.tsx";
 import { SearchPage } from "../SearchPage.tsx";
+// Imported once so the lazy import inside StationField resolves at once instead of
+// loading react-aria-components mid-test.
+import "../StationComboBox.tsx";
 
 const today = startOfLocalDay(new Date());
 const todayValue = formatLocalDate(today);
@@ -22,13 +26,17 @@ function renderPage(url: string) {
   const api = vi.fn(createSearchJourneys({ delayMs: 0 }));
   const utils = render(
     <QueryClientProvider client={new QueryClient()}>
-      <ApiProvider api={api}>
+      <ApiProvider api={api} suggest={createSuggestStations({ delayMs: 0 })}>
         <SearchPage />
       </ApiProvider>
     </QueryClientProvider>,
   );
   return { ...utils, api, user: userEvent.setup() };
 }
+
+/** The station fields swap from a plain input to the lazy combobox; tests that touch them wait for it. */
+const station = (name: "Origin" | "Destination") =>
+  screen.findByRole("combobox", { name });
 
 describe("SearchPage", () => {
   beforeEach(() => {
@@ -79,7 +87,7 @@ describe("SearchPage", () => {
       );
     });
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
-    expect(screen.getByLabelText("Origin")).toHaveValue("Enschede");
+    expect(await station("Origin")).toHaveValue("Enschede");
     expect(await axe(container)).toHaveNoViolations();
   });
 
@@ -94,7 +102,7 @@ describe("SearchPage", () => {
       screen.getByText("Choose between 1 and 10 passengers"),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Passengers")).toHaveFocus();
-    expect(screen.getByLabelText("Destination")).toHaveValue("Hengelo");
+    expect(await station("Destination")).toHaveValue("Hengelo");
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
     expect(api).not.toHaveBeenCalled();
     expect(await axe(container)).toHaveNoViolations();
@@ -117,8 +125,9 @@ describe("SearchPage", () => {
 
   it("writes the URL on submit and shows the results", async () => {
     const { user } = renderPage("/");
-    await user.type(screen.getByLabelText("Origin"), "Enschede");
-    await user.type(screen.getByLabelText("Destination"), "Almelo");
+    // Escape closes each lookup popup, which hides the rest of the page while open.
+    await user.type(await station("Origin"), "Enschede{Escape}");
+    await user.type(await station("Destination"), "Almelo{Escape}");
     await user.click(screen.getByRole("button", { name: "Search journeys" }));
 
     expect(window.location.search).toBe(
@@ -126,7 +135,7 @@ describe("SearchPage", () => {
     );
     await screen.findByRole("table");
     expect(screen.getByRole("status")).toHaveTextContent("2 journeys found");
-    expect(screen.getByLabelText("Origin")).toHaveValue("Enschede");
+    expect(await station("Origin")).toHaveValue("Enschede");
     expect(
       screen.getByRole("region", { name: "Search results" }),
     ).toHaveFocus();
