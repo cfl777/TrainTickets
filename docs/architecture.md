@@ -292,15 +292,15 @@ The brief asks that no invalid or insecure request reaches the search API. The A
 
 ## Performance
 
-| Measure                      | Budget                                                                                                                                                            | How                                           |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Initial JavaScript           | under 100 KB gzipped (measured 84.3 at commit `3ac9f10`: React and ReactDOM 67.8, TanStack Query client and `useQuery` about 8, the app about 8.5)                 | `pnpm build` output and the size-check script |
-| Station lookup chunk         | under 70 KB gzipped, loaded on demand after the first render (measured 60.0)                                                                                     | a second size-limit entry                     |
-| Lighthouse performance       | 95 or above, mobile and desktop                                                                                                                                  | recorded in the README                        |
-| Layout shift on state change | 0                                                                                                                                                                | reserved results height                       |
-| Input delay                  | none from React                                                                                                                                                  | uncontrolled inputs                           |
-| Font requests                | 0                                                                                                                                                                | system font stack                             |
-| Devtools in production       | 0 bytes                                                                                                                                                          | lazy import behind `import.meta.env.DEV`      |
+| Measure                      | Budget                                                                                                                                             | How                                           |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Initial JavaScript           | under 100 KB gzipped (measured 84.3 at commit `3ac9f10`: React and ReactDOM 67.8, TanStack Query client and `useQuery` about 8, the app about 8.5) | `pnpm build` output and the size-check script |
+| Station lookup chunk         | under 70 KB gzipped, loaded on demand after the first render (measured 60.0)                                                                       | a second size-limit entry                     |
+| Lighthouse performance       | 95 or above, mobile and desktop                                                                                                                    | recorded in the README                        |
+| Layout shift on state change | 0                                                                                                                                                  | reserved results height                       |
+| Input delay                  | none from React                                                                                                                                    | uncontrolled inputs                           |
+| Font requests                | 0                                                                                                                                                  | system font stack                             |
+| Devtools in production       | 0 bytes                                                                                                                                            | lazy import behind `import.meta.env.DEV`      |
 
 Formatters are created once per locale. Stale responses are never rendered. Vite's default modern browser target, no legacy plugin.
 
