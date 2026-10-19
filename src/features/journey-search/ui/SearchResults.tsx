@@ -6,6 +6,9 @@
  * - aria-busy while loading; a reserved minimum height so the layout does
  *   not shift between states.
  * - No rule lives here: every string and number comes from the hook.
+ * - The status sits under the rows, as the footer of the list, right
+ *   aligned once there is a table; its position in the DOM does not
+ *   matter to assistive tech, which listens to the region wherever it is.
  */
 import { resultStrings } from "../model/strings.ts";
 import type { JourneySearchState } from "../model/useJourneySearch.ts";
@@ -35,19 +38,22 @@ function statusText(state: JourneySearchState): string {
 
 export function SearchResults({ state }: Props) {
   const busy = state.kind === "loading";
+  const hasRows = state.kind === "success" && state.count > 0;
   return (
     <div className={styles.results} aria-busy={busy}>
-      <StatusMessage message={statusText(state)} busy={busy} />
       {state.kind === "error" ? (
         <ErrorMessage message={state.message} onRetry={state.retry} />
       ) : null}
-      {state.kind === "success" && state.count > 0 ? (
+      {hasRows ? (
         <JourneyTable
           caption={state.caption}
           rows={state.rows}
           passengers={state.passengers}
         />
       ) : null}
+      <div className={hasRows ? styles.footer : undefined}>
+        <StatusMessage message={statusText(state)} busy={busy} />
+      </div>
     </div>
   );
 }
