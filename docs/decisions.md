@@ -112,6 +112,8 @@ A swap button between origin and destination, and dark mode through a `prefers-c
 
 **Options considered:** Committing to `main` with CI reporting after the fact (how Phase 2 was done; a red run would already be in the history). Squash merging (one commit per pull request, which would discard the granular history). Merge commits (keep the commits but add a merge node per pull request; declined for the linear history).
 
+**Amended 19 Oct 2026:** the "require branches to be up to date before merging" rule is off. With one author and several small open pull requests, every merge put the others behind and forced a rebase and a full CI run each, for a guarantee that rebase merging does not give anyway: GitHub rewrites the commits onto `main` at merge time, so the checks never ran on the exact commits that land. The three required checks, linear history and the no-force-push rule stay; a real file conflict still blocks a merge.
+
 ## 21a · Hosted preview (18 Oct 2026)
 
 **Decided:** a Vercel project named `train-journeys`, linked to the GitHub repository through the Git integration. `main` deploys to production at https://train-journeys.vercel.app with the repository's own `pnpm build`, so the typecheck and the size check gate the deploy as well. Preview deployments are switched off: only `main` is deployed, and the site is public. The README names the link and the commit it reflected when the numbers were taken. The site allows a first look without installing anything, and it gives the Lighthouse numbers a real origin instead of a local preview server.

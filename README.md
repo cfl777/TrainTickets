@@ -41,7 +41,7 @@ Hosted preview: https://train-journeys.vercel.app. Only `main` is deployed; at t
 
 ## Build numbers
 
-Measured on 18 October 2026 at commit `4ce6ef8`: the size from `pnpm build` (size-limit, gzip), the scores from Lighthouse 13.5 run against the hosted preview with the mobile and desktop presets. The first mobile run of a cold browser session scored 92 (LCP 1.6 s); three repeats scored 100 (LCP 1.3 s, no blocking time), so 100 is reported with that note.
+Sizes from `pnpm build` (size-limit, gzip) on 19 October 2026 at commit `3ac9f10`, the first page with the station lookup. Lighthouse 13.5 scores from 18 October 2026 at commit `4ce6ef8`, the page before it, run against the hosted preview with the mobile and desktop presets; a re-run on the final page is pending. The first mobile run of a cold browser session scored 92 (LCP 1.6 s); three repeats scored 100 (LCP 1.3 s, no blocking time), so 100 is reported with that note.
 
 | Measure                     | Budget       | Measured                |
 | --------------------------- | ------------ | ----------------------- |
