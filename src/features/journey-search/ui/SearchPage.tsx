@@ -9,8 +9,9 @@
  *   it to fresh defaults from the URL and a shared link pre-fills it.
  * - Submitting writes the URL; the hook reacts to the URL (decision 04).
  * - The form says when its fields no longer mean the searched values; the
- *   page keeps that as the search string it belongs to, so a new search
- *   clears it without an effect, and hands the boolean to the results
+ *   page keeps that as the search string it belongs to and drops it as
+ *   soon as the URL moves on (a submit, Back, Forward), so a search the
+ *   visitor returns to starts clean; the boolean goes to the results
  *   (decision 27).
  * - The document title reflects the search (2.4.2).
  * - When the search changes after a submit, focus moves to the results
@@ -43,6 +44,12 @@ export function SearchPage() {
   const resultsRef = useRef<HTMLElement>(null);
   const previousSearch = useRef(search);
   const [dirtyFor, setDirtyFor] = useState<string | null>(null);
+  // Dirtiness belongs to the search it was computed for. Once the URL has
+  // moved on it is obsolete: the re-mounted form matches its URL again and
+  // would never report "clean" for a flag it did not set.
+  if (dirtyFor !== null && dirtyFor !== search) {
+    setDirtyFor(null);
+  }
 
   const hasSearch =
     state.kind === "loading" ||

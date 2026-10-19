@@ -194,6 +194,28 @@ test("says what the results are for once a field changes, until the next search"
   );
 });
 
+test("forgets the stale notice when Back returns to the search it was about", async ({
+  page,
+}) => {
+  await page.goto(
+    `/?origin=Enschede&destination=Hengelo&date=${tomorrow()}&passengers=2`,
+  );
+  await expect(page.getByRole("status")).toHaveText("2 journeys found");
+  const destination = page.getByRole("combobox", { name: "Destination" });
+  await destination.fill("Almelo");
+  await destination.press("Escape");
+  await expect(page.getByRole("status")).toHaveText(/Results are for/);
+  await page.getByRole("button", { name: "Search journeys" }).click();
+  await expect(page).toHaveURL(/destination=Almelo/);
+
+  await page.goBack();
+  await expect(page).toHaveURL(/destination=Hengelo/);
+  await expect(page.getByRole("status")).toHaveText("2 journeys found");
+  await expect(page.getByRole("table")).toHaveAccessibleName(
+    /Enschede to Hengelo/,
+  );
+});
+
 test("greys the origin out as a destination and objects at once when it is typed anyway", async ({
   page,
 }) => {
