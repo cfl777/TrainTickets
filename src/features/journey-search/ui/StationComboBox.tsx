@@ -90,6 +90,17 @@ export function StationComboBox({
     .map((station) => station.id);
   const takenTag =
     id === "destination" ? formStrings.ticket.from : formStrings.ticket.to;
+  const takenGlyph = cx(
+    styles.dot,
+    id === "destination" ? undefined : styles.dotTo,
+  );
+  // The text-node space before the tag keeps the name two words for a screen reader.
+  const takenMark = (
+    <>
+      {" "}
+      <span className={styles.taken}>{takenTag}</span>
+    </>
+  );
 
   return (
     <ComboBox
@@ -156,22 +167,11 @@ export function StationComboBox({
               {({ isDisabled }) => (
                 <>
                   {isDisabled ? (
-                    <span
-                      className={cx(
-                        styles.dot,
-                        id === "destination" ? undefined : styles.dotTo,
-                      )}
-                      aria-hidden="true"
-                    />
+                    <span className={takenGlyph} aria-hidden="true" />
                   ) : null}
                   <strong>{station.name.slice(0, typedLength)}</strong>
                   {station.name.slice(typedLength)}
-                  {isDisabled ? (
-                    <>
-                      {/* A real space, so the name is read as two words. */}{" "}
-                      <span className={styles.taken}>{takenTag}</span>
-                    </>
-                  ) : null}
+                  {isDisabled ? takenMark : null}
                 </>
               )}
             </ListBoxItem>
