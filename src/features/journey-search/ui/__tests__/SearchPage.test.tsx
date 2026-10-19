@@ -45,9 +45,11 @@ describe("SearchPage", () => {
 
   it("is idle without a query string: form, empty status, app title", async () => {
     const { container, api } = renderPage("/");
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "Train journeys",
-    );
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("Train journeys");
+    // The heading sits in the ticket's stub, inside the search landmark
+    // (queried by element: Testing Library's role map predates <search>).
+    expect(container.querySelector("search")).toContainElement(heading);
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
     expect(document.title).toBe("Train journeys");

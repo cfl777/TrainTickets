@@ -231,6 +231,7 @@ App
 - `JourneyTable` contains no `Intl` call and no arithmetic. Four columns: Departure, Arrival, Duration, "Total for N passengers". Origin, destination and date are in the visible caption. Row ids come from the view model (composite of departure, arrival and price plus index).
 - One headless library, for the one control that earns it: the station combobox comes from React Aria Components (decision 23); every other control is native. Headless libraries earn their place on dialogs, menus, comboboxes and custom date pickers, and the date input stays native.
 - CSS Modules with modern CSS; tokens as custom properties in `shared/styles/tokens.css`; no runtime styling. The look is a "ticket": an off-white page, the form as a white card with a teal edge, result rows as spaced white cards that remain table rows, prices in a tinted pill. Depth comes from tone, never shadows. Dark mode redefines the same tokens under `prefers-color-scheme: dark`; no component knows which mode it is in.
+- The form card is a ticket: heading in the stub, perforation above the fields, CSS only (decision 24).
 
 ## Responsive
 

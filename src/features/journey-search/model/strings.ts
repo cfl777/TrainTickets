@@ -20,6 +20,8 @@ export const formStrings = {
   passengers: { label: "Passengers" },
   submit: "Search journeys",
   stationsNote: "The demo timetable serves Enschede, Hengelo and Almelo.",
+  /** Decorative route line in the ticket stub; CSS uppercases it. */
+  ticket: { from: "Origin", to: "Destination" },
   /** Copy of the station lookup popup. */
   stations: {
     searching: "Searching stations",
