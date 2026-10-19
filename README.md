@@ -37,17 +37,17 @@ Tests sit in a `__tests__` folder beside the files they cover. The pure modules 
 
 ## Try it without installing
 
-Hosted preview: https://train-journeys.vercel.app. Only `main` is deployed; at the time of writing the site reflects commit `4ce6ef8`. Added for quick initial checks without starting the project; the local route above stays the reference.
+Hosted preview: https://train-journeys.vercel.app. Only `main` is deployed; at the time of writing the site reflects commit `aaa307d`. Added for quick initial checks without starting the project; the local route above stays the reference.
 
 ## Build numbers
 
-Sizes from `pnpm build` (size-limit, gzip) on 19 October 2026 at commit `3ac9f10`, the first page with the station lookup. Lighthouse 13.5 scores from 18 October 2026 at commit `4ce6ef8`, the page before it, run against the hosted preview with the mobile and desktop presets; a re-run on the final page is pending. The first mobile run of a cold browser session scored 92 (LCP 1.6 s); three repeats scored 100 (LCP 1.3 s, no blocking time), so 100 is reported with that note.
+Measured on 19 October 2026 at commit `aaa307d`: the sizes from `pnpm build` (size-limit, gzip), the scores from Lighthouse 13.5 run against the hosted preview with the mobile and desktop presets. The first mobile run of a cold browser session scored 93 (LCP 1.6 s, 160 ms blocking); the repeats scored 99 with no blocking time, so 99 is reported with that note. The results page scored 100 on mobile.
 
 | Measure                     | Budget       | Measured                |
 | --------------------------- | ------------ | ----------------------- |
-| Initial JavaScript, gzipped | under 100 KB | 84.31 kB                |
-| Station lookup chunk        | under 70 KB  | 59.99 kB, on demand     |
-| Lighthouse performance      | 95 or above  | 100 mobile, 100 desktop |
+| Initial JavaScript, gzipped | under 100 KB | 84.77 kB                |
+| Station lookup chunk        | under 70 KB  | 60.2 kB, on demand      |
+| Lighthouse performance      | 95 or above  | 99 mobile, 100 desktop  |
 | Lighthouse accessibility    | 100          | 100 mobile, 100 desktop |
 
 ## Dependencies
