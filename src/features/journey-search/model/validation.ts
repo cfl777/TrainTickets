@@ -44,7 +44,7 @@ type ValidationResult =
   | { readonly ok: true; readonly value: ValidJourneyParameters }
   | { readonly ok: false; readonly errors: ValidationErrors };
 
-const MAX_STATION_LENGTH = 100;
+export const MAX_STATION_LENGTH = 100;
 const MIN_PASSENGERS = 1;
 const MAX_PASSENGERS = 10;
 const WHOLE_NUMBER = /^\d+$/;
