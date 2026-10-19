@@ -30,6 +30,10 @@
  *   that station out. Choosing from the lookup fires no change event, so
  *   the fields report their text through a callback and the form keeps
  *   both texts in state.
+ * - The same re-validation pass reports through onDirtyChange whether the
+ *   fields still mean the searched values (defaultValues), compared by the
+ *   model's isSameSearch, so a space typed and deleted is not a change.
+ *   Only transitions are reported; the page keeps the boolean (decision 27).
  */
 import {
   useActionState,
@@ -44,6 +48,7 @@ import {
   formatLocalDate,
   startOfLocalDay,
 } from "../../../shared/lib/localDate.ts";
+import { isSameSearch } from "../model/sameSearch.ts";
 import { formStrings, validationMessages } from "../model/strings.ts";
 import type { ValidJourneyParameters } from "../model/types.ts";
 import {
@@ -68,6 +73,8 @@ type Props = Readonly<{
   /** Errors from an invalid URL, shown until the first submit. */
   initialErrors: ValidationErrors | null;
   onSearch: (params: ValidJourneyParameters) => void;
+  /** Called when the fields start or stop differing from defaultValues; never without them. */
+  onDirtyChange?: (dirty: boolean) => void;
   now?: () => Date;
 }>;
 
@@ -131,6 +138,7 @@ export function SearchForm({
   defaultValues,
   initialErrors,
   onSearch,
+  onDirtyChange,
   now = () => new Date(),
 }: Props) {
   const today = startOfLocalDay(now());
@@ -186,12 +194,21 @@ export function SearchForm({
     destination: value("destination") ?? "",
   });
 
+  const reportedDirty = useRef(false);
+
   function revalidate(raw: RawJourneyParameters) {
     const result = validateJourneyParameters(raw, now());
     setLive({
       attempt: state.attempt,
       errors: result.ok ? {} : keepShown(result.errors, shownErrors),
     });
+    if (defaultValues !== null && onDirtyChange !== undefined) {
+      const dirty = !isSameSearch(raw, defaultValues, now());
+      if (dirty !== reportedDirty.current) {
+        reportedDirty.current = dirty;
+        onDirtyChange(dirty);
+      }
+    }
   }
 
   function handleChange(event: ChangeEvent<HTMLFormElement>) {

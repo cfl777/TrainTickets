@@ -298,6 +298,61 @@ describe("SearchForm", () => {
     expect(screen.getByLabelText("Travel date")).toHaveValue("2026-10-21");
   });
 
+  describe("onDirtyChange", () => {
+    const searched = {
+      origin: "Enschede",
+      destination: "Hengelo",
+      date: "2026-10-21",
+      passengers: "2",
+    };
+
+    it("reports true once a field differs from the searched values, false when the same value is retyped", async () => {
+      const onDirtyChange = vi.fn();
+      const { user } = await renderForm({
+        defaultValues: searched,
+        onDirtyChange,
+      });
+      await user.clear(destination());
+      expect(onDirtyChange.mock.calls).toEqual([[true]]);
+
+      await user.type(destination(), typed(" hengelo"));
+      expect(onDirtyChange.mock.calls).toEqual([[true], [false]]);
+    });
+
+    it("does not count a space typed and deleted as a change", async () => {
+      const onDirtyChange = vi.fn();
+      const { user } = await renderForm({
+        defaultValues: searched,
+        onDirtyChange,
+      });
+      await user.type(destination(), " {Backspace}");
+      expect(onDirtyChange).not.toHaveBeenCalled();
+    });
+
+    it("reports a station chosen from the lookup, which fires no change event", async () => {
+      const onDirtyChange = vi.fn();
+      const { user } = await renderForm({
+        defaultValues: searched,
+        onDirtyChange,
+      });
+      await user.clear(destination());
+      await user.keyboard("{Escape}");
+      await user.click(
+        screen.getByRole("button", { name: "Show stations Destination" }),
+      );
+      await user.click(await screen.findByRole("option", { name: "Hengelo" }));
+      expect(destination()).toHaveValue("Hengelo");
+      expect(onDirtyChange.mock.calls).toEqual([[true], [false]]);
+    });
+
+    it("reports nothing before a search", async () => {
+      const onDirtyChange = vi.fn();
+      const { user } = await renderForm({ onDirtyChange });
+      await user.type(origin(), typed("Enschede"));
+      expect(onDirtyChange).not.toHaveBeenCalled();
+    });
+  });
+
   it("has no accessibility violations before and after a failed submit", async () => {
     const { container, user } = await renderForm();
     expect(await axe(container)).toHaveNoViolations();

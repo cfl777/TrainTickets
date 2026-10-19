@@ -17,7 +17,11 @@ import { skipToken, useQuery } from "@tanstack/react-query";
 import { formatDate, type Locales } from "../../../shared/lib/format.ts";
 import { formatLocalDate } from "../../../shared/lib/localDate.ts";
 import { parseSearchParams } from "./searchParams.ts";
-import { resultsCaption, searchErrorMessage } from "./strings.ts";
+import {
+  resultsCaption,
+  resultStrings,
+  searchErrorMessage,
+} from "./strings.ts";
 import { toJourneyRows, type JourneyRow } from "./toJourneyRows.ts";
 import type { ValidJourneyParameters } from "./types.ts";
 import { useSearchApi } from "./useSearchApi.tsx";
@@ -42,6 +46,8 @@ export type JourneySearchState =
       readonly raw: RawJourneyParameters;
       readonly rows: readonly JourneyRow[];
       readonly caption: string;
+      /** The status line while the form no longer matches this search. */
+      readonly stale: string;
       readonly count: number;
       readonly passengers: number;
     }
@@ -49,6 +55,7 @@ export type JourneySearchState =
       readonly kind: "error";
       readonly raw: RawJourneyParameters;
       readonly message: string;
+      readonly stale: string;
       readonly retry: () => void;
     };
 
@@ -116,6 +123,10 @@ export function useJourneySearch(
     return resolved;
   }
   const { raw } = resolved;
+  const stale = resultStrings.stale(
+    resolved.params.origin,
+    resolved.params.destination,
+  );
 
   // A retry keeps the error data while it refetches; show the loading state
   // instead, so the status region says "Searching" again.
@@ -124,6 +135,7 @@ export function useJourneySearch(
       kind: "error",
       raw,
       message: searchErrorMessage,
+      stale,
       retry: () => {
         void query.refetch();
       },
@@ -143,6 +155,7 @@ export function useJourneySearch(
         date: formatDate(resolved.params.date, locales),
         passengers: resolved.params.nrOfPassengers,
       }),
+      stale,
     };
   }
   return { kind: "loading", raw };

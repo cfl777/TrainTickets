@@ -8,6 +8,10 @@
  * - The form is keyed on the search string, so a successful search resets
  *   it to fresh defaults from the URL and a shared link pre-fills it.
  * - Submitting writes the URL; the hook reacts to the URL (decision 04).
+ * - The form says when its fields no longer mean the searched values; the
+ *   page keeps that as the search string it belongs to, so a new search
+ *   clears it without an effect, and hands the boolean to the results
+ *   (decision 27).
  * - The document title reflects the search (2.4.2).
  * - When the search changes after a submit, focus moves to the results
  *   region, so it is never lost when the form remounts and a screen-reader
@@ -15,7 +19,7 @@
  *   also scroll into view, without motion when the user prefers none. A
  *   page opened with a query string keeps its natural focus.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "../../../shared/hooks/useSearchParams.ts";
 import { toSearchParams } from "../model/searchParams.ts";
 import {
@@ -37,6 +41,7 @@ export function SearchPage() {
   const state = useJourneySearch(search, { locales: navigator.languages });
   const resultsRef = useRef<HTMLElement>(null);
   const previousSearch = useRef(search);
+  const [dirtyFor, setDirtyFor] = useState<string | null>(null);
 
   const searching =
     state.kind === "loading" ||
@@ -93,6 +98,9 @@ export function SearchPage() {
             onSearch={(params) => {
               setSearch(toSearchParams(params));
             }}
+            onDirtyChange={(dirty) => {
+              setDirtyFor(dirty ? search : null);
+            }}
           />
         </div>
         <p className={styles.note}>{formStrings.stationsNote}</p>
@@ -103,7 +111,7 @@ export function SearchPage() {
         tabIndex={-1}
         className={styles.results}
       >
-        <SearchResults state={state} />
+        <SearchResults state={state} dirty={dirtyFor === search} />
       </section>
     </main>
   );

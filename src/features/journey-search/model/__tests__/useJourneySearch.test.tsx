@@ -85,6 +85,9 @@ describe("useJourneySearch", () => {
     expect(state.caption).toBe(
       "Enschede to Hengelo on Wednesday, October 21, 2026, 2 passengers",
     );
+    expect(state.stale).toBe(
+      "Results are for Enschede to Hengelo. Search again to update.",
+    );
   });
 
   it("succeeds with zero rows when nothing matches", async () => {
@@ -109,6 +112,9 @@ describe("useJourneySearch", () => {
     if (state.kind !== "error") return;
     expect(state.message).toBe(
       "Something went wrong while searching for journeys.",
+    );
+    expect(state.stale).toBe(
+      "Results are for Almelo to Enschede. Search again to update.",
     );
     expect(api).toHaveBeenCalledTimes(1);
 

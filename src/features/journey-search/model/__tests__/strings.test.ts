@@ -31,6 +31,12 @@ describe("result strings", () => {
     ).toBe(text);
   });
 
+  it("names the searched route in the notice for results the form has moved away from", () => {
+    expect(resultStrings.stale("Enschede", "Hengelo")).toBe(
+      "Results are for Enschede to Hengelo. Search again to update.",
+    );
+  });
+
   it("puts the search before the app name in the title", () => {
     expect(searchTitle("Enschede", "Hengelo")).toBe(
       "Enschede to Hengelo | Train journeys",

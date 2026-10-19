@@ -170,6 +170,52 @@ describe("SearchPage", () => {
     }
   });
 
+  it("says what the results are for once the form changes, until the next search", async () => {
+    const { container, user } = renderPage(
+      `/?origin=Enschede&destination=Hengelo&date=${tomorrowValue}&passengers=2`,
+    );
+    await screen.findByRole("table");
+    const destination = await station("Destination");
+    await user.type(destination, " {Backspace}{Escape}");
+    expect(screen.getByRole("status")).toHaveTextContent("2 journeys found");
+
+    await user.clear(destination);
+    await user.type(destination, "Almelo{Escape}");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Results are for Enschede to Hengelo. Search again to update.",
+    );
+    expect(screen.getByRole("table")).toHaveAccessibleName(
+      /Enschede to Hengelo/,
+    );
+    expect(screen.getAllByRole("row")).toHaveLength(3);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(destination).toHaveFocus();
+    expect(await axe(container)).toHaveNoViolations();
+
+    await user.click(screen.getByRole("button", { name: "Search journeys" }));
+    expect(
+      await screen.findByRole("table", { name: /Enschede to Almelo/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("2 journeys found");
+  });
+
+  it("keeps the retry for the failed search and says which search it is for once the form changes", async () => {
+    const { user } = renderPage(
+      `/?origin=Almelo&destination=Enschede&date=${tomorrowValue}&passengers=2`,
+    );
+    await screen.findByRole("alert");
+    const passengers = screen.getByLabelText("Passengers");
+    await user.clear(passengers);
+    await user.type(passengers, "3");
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Results are for Almelo to Enschede. Search again to update.",
+    );
+    expect(
+      screen.getByRole("button", { name: "Try again" }),
+    ).toBeInTheDocument();
+  });
+
   it("writes the URL on submit and shows the results", async () => {
     const { user } = renderPage("/");
     // Escape closes each lookup popup, which hides the rest of the page while open.

@@ -1,5 +1,20 @@
 .results {
   min-height: 12rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Once the form has moved away from the search (decision 27): the status
+   line becomes a notice above the rows, and the rows dim to 65 %, which
+   keeps their text above 4.5:1 on the page in both modes. The alert, when
+   there is one, keeps its full strength. */
+.notice {
+  order: -1;
+  font-size: 0.875rem;
+}
+
+.stale table {
+  opacity: 0.65;
 }
 
 /* Under the rows, the count reads as the list's footer: right aligned, small. */
