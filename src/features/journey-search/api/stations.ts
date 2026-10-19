@@ -13,6 +13,7 @@
  *   an instant instance and the app a small simulated latency.
  */
 import { isSameText } from "../../../shared/lib/text.ts";
+import { delay } from "./delay.ts";
 import { timetable } from "./timetable.ts";
 
 export type Station = Readonly<{ id: string; name: string }>;
@@ -36,12 +37,6 @@ export function matchStations(query: string): readonly Station[] {
 }
 
 const DEFAULT_DELAY_MS = 150;
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
 
 export function createSuggestStations({
   delayMs = DEFAULT_DELAY_MS,
