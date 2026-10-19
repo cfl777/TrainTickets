@@ -5,12 +5,16 @@
  * - One request per distinct normalised prefix, cached for the session:
  *   the list is static, so typing "En", deleting, typing "En" again never
  *   asks twice, and both fields share one cache.
- * - The previous list stays while the next prefix loads, so the popup
- *   does not flash empty between keystrokes.
+ * - While the next prefix loads, the previous list stays but only the
+ *   stations that match the new prefix: the popup does not flash empty
+ *   between keystrokes, and it never offers a station from another
+ *   prefix as if it matched, so ArrowDown and Enter before the answer
+ *   arrives cannot pick the wrong one. When no previous station matches,
+ *   the hook is loading, not empty.
  * - The empty prefix is a request too: it lists every station.
  */
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type { Station } from "../api/stations.ts";
+import { useQuery } from "@tanstack/react-query";
+import { matchesPrefix, type Station } from "../api/stations.ts";
 import { useSuggestStations } from "./useSearchApi.tsx";
 
 /** Re-exported so the ui layer never reaches into api. */
@@ -29,7 +33,13 @@ export function useStationSuggestions(query: string): {
     queryKey: ["stations", prefix],
     queryFn: () => suggest(prefix),
     staleTime: Infinity,
-    placeholderData: keepPreviousData,
+    // A new function per render: Query reuses the last placeholder when the reference is unchanged.
+    placeholderData: (previous) => {
+      const kept = previous?.filter((station) =>
+        matchesPrefix(station, prefix),
+      );
+      return kept !== undefined && kept.length > 0 ? kept : undefined;
+    },
     retry: 0,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
