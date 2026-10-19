@@ -92,9 +92,7 @@ test("shows the unknown-station message for a URL with an unknown origin and doe
   const origin = page.getByRole("combobox", { name: "Origin" });
   await expect(origin).toHaveValue("Zwolle");
   await expect(origin).toHaveAttribute("aria-invalid", "true");
-  // Focus is not asserted: open bug, focus is lost on load when the first
-  // invalid field is a station field (the fallback input is focused, the
-  // combobox that replaces it is not).
+  await expect(origin).toBeFocused();
   await expect(page.getByRole("status")).toHaveText("");
   await expect(page.getByRole("table")).toHaveCount(0);
 });
