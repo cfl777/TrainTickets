@@ -19,7 +19,7 @@
  *   imports react-aria-components, so Vite splits it out of the initial
  *   bundle.
  */
-import { useState } from "react";
+import { useState, type Ref } from "react";
 import {
   Button,
   ComboBox,
@@ -49,8 +49,8 @@ export type StationFieldProps = Readonly<{
 
 type Props = StationFieldProps &
   Readonly<{
-    /** True when the visitor was already in the fallback input this control replaces. */
-    focusOnMount?: boolean;
+    /** Reaches the input element, so StationField can hand over the fallback's focus. */
+    inputRef?: Ref<HTMLInputElement>;
   }>;
 
 /** CSS module keys are string | undefined under noUncheckedIndexedAccess; React Aria wants a string. */
@@ -64,7 +64,7 @@ export function StationComboBox({
   placeholder,
   defaultValue,
   error,
-  focusOnMount = false,
+  inputRef,
 }: Props) {
   const [inputValue, setInputValue] = useState(defaultValue);
   const { stations, isLoading } = useStationSuggestions(inputValue);
@@ -86,8 +86,6 @@ export function StationComboBox({
       isRequired
       isInvalid={invalid}
       validationBehavior="aria"
-      // eslint-disable-next-line jsx-a11y/no-autofocus -- gives back the focus the visitor already had, it never takes it
-      autoFocus={focusOnMount}
     >
       <Label className={cx(fieldStyles.label)}>{label}</Label>
       <div className={fieldStyles.control}>
@@ -96,6 +94,7 @@ export function StationComboBox({
         </span>
         <Input
           id={id}
+          ref={inputRef}
           className={cx(styles.input)}
           placeholder={placeholder}
           maxLength={100}

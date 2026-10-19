@@ -8,9 +8,13 @@
  *   with the same id, name, label, placeholder and error, so the page is
  *   usable at once and nothing jumps.
  * - What the visitor did meanwhile is handed over: the fallback's text
- *   and focus become the combobox's initial value and autoFocus.
+ *   becomes the combobox's initial value, and if the fallback is the active
+ *   element as it leaves the DOM, the combobox input is focused as it
+ *   arrives. Whether it had focus is read from the DOM, not from focus
+ *   events: a window without focus (a link opened in a background tab)
+ *   moves the active element on focus() but fires no event.
  */
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useRef, useState } from "react";
 import { Field } from "../../../shared/ui/Field.tsx";
 import { MapPinIcon } from "../../../shared/ui/icons.tsx";
 import type { StationFieldProps } from "./StationComboBox.tsx";
@@ -23,10 +27,8 @@ const StationComboBox = lazy(() =>
 
 export function StationField(props: StationFieldProps) {
   const { id, label, placeholder, defaultValue, error } = props;
-  const [handover, setHandover] = useState({
-    value: defaultValue,
-    focused: false,
-  });
+  const [value, setValue] = useState(defaultValue);
+  const fallbackHadFocus = useRef(false);
 
   const fallback = (
     <Field
@@ -38,19 +40,17 @@ export function StationField(props: StationFieldProps) {
       {(control) => (
         <input
           {...control}
+          // The cleanup runs as the fallback is removed, while it is still in the DOM.
+          ref={(node) => () => {
+            fallbackHadFocus.current = document.activeElement === node;
+          }}
           name={id}
           type="text"
           required
           maxLength={100}
-          value={handover.value}
+          value={value}
           onChange={(event) => {
-            setHandover({ value: event.target.value, focused: true });
-          }}
-          onFocus={() => {
-            setHandover((previous) => ({ ...previous, focused: true }));
-          }}
-          onBlur={() => {
-            setHandover((previous) => ({ ...previous, focused: false }));
+            setValue(event.target.value);
           }}
           placeholder={placeholder}
           autoCapitalize="words"
@@ -65,8 +65,13 @@ export function StationField(props: StationFieldProps) {
     <Suspense fallback={fallback}>
       <StationComboBox
         {...props}
-        defaultValue={handover.value}
-        focusOnMount={handover.focused}
+        defaultValue={value}
+        inputRef={(node) => {
+          if (node !== null && fallbackHadFocus.current) {
+            fallbackHadFocus.current = false;
+            node.focus();
+          }
+        }}
       />
     </Suspense>
   );
