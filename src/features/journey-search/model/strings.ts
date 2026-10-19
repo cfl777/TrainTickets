@@ -55,6 +55,9 @@ export const resultStrings = {
   found: (count: number): string =>
     count === 1 ? "1 journey found" : `${String(count)} journeys found`,
   none: "No journeys found for this search",
+  /** Shown instead of the count once the form no longer matches the search (decision 27). */
+  stale: (origin: string, destination: string): string =>
+    `Results are for ${origin} to ${destination}. Search again to update.`,
   retry: "Try again",
   resultsRegion: "Search results",
   tableRegion: "Journey results",

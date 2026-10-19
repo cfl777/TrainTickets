@@ -165,6 +165,32 @@ test("keeps the stub's route line inside the card, also at a large font size", a
   expect(large.routeOverflow).toBeLessThanOrEqual(0);
 });
 
+test("says what the results are for once a field changes, until the next search", async ({
+  page,
+}) => {
+  await page.goto(
+    `/?origin=Enschede&destination=Hengelo&date=${tomorrow()}&passengers=2`,
+  );
+  await expect(page.getByRole("status")).toHaveText("2 journeys found");
+
+  const destination = page.getByRole("combobox", { name: "Destination" });
+  await destination.fill("Almelo");
+  await destination.press("Escape");
+  await expect(page.getByRole("status")).toHaveText(
+    "Results are for Enschede to Hengelo. Search again to update.",
+  );
+  // The old rows stay readable and the address is untouched until a submit.
+  await expect(page.getByRole("row")).toHaveCount(3);
+  await expect(page).toHaveURL(/destination=Hengelo/);
+
+  await page.getByRole("button", { name: "Search journeys" }).click();
+  await expect(page).toHaveURL(/destination=Almelo/);
+  await expect(page.getByRole("status")).toHaveText("2 journeys found");
+  await expect(page.getByRole("table")).toHaveAccessibleName(
+    /Enschede to Almelo/,
+  );
+});
+
 test("greys the origin out as a destination and objects at once when it is typed anyway", async ({
   page,
 }) => {
