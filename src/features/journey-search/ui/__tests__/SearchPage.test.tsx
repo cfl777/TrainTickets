@@ -110,9 +110,28 @@ describe("SearchPage", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
+  it("shows the unknown-station message for a URL with an unknown origin and never calls the api", async () => {
+    const { container, api } = renderPage(
+      `/?origin=Zwolle&destination=Hengelo&date=${tomorrowValue}&passengers=2`,
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "1 field needs attention",
+    );
+    expect(
+      screen.getByText("Choose a station from the list"),
+    ).toBeInTheDocument();
+    const origin = await station("Origin");
+    expect(origin).toHaveValue("Zwolle");
+    expect(origin).toHaveAttribute("aria-invalid", "true");
+    expect(origin).toHaveFocus();
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    expect(api).not.toHaveBeenCalled();
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
   it("shows a focused error with a retry that searches again", async () => {
     const { container, api, user } = renderPage(
-      `/?origin=error&destination=Hengelo&date=${tomorrowValue}&passengers=2`,
+      `/?origin=Almelo&destination=Enschede&date=${tomorrowValue}&passengers=2`,
     );
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveFocus();

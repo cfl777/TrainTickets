@@ -101,7 +101,7 @@ describe("useJourneySearch", () => {
   it("reports an error with a message and a working retry", async () => {
     const api = vi.fn(createSearchJourneys({ delayMs: 0, now }));
     const { result } = setup(
-      "?origin=error&destination=Hengelo&date=2026-10-21&passengers=2",
+      "?origin=Almelo&destination=Enschede&date=2026-10-21&passengers=2",
       api,
     );
     const state = await settled(result);

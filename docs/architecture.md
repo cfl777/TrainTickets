@@ -38,22 +38,22 @@ Five visible states: idle (no query string), loading, results, no results, error
 
 Parsing rules: key order is irrelevant; unknown keys are ignored; a duplicate key takes its first value; a missing or malformed key is a validation error; no query string at all is the idle state. The form's inputs carry these exact names, so `FormData` maps to the URL one to one. The URL is always written with `URLSearchParams`, never by string concatenation.
 
-| Address                                                      | Page state                                  |
-| ------------------------------------------------------------ | ------------------------------------------- |
-| `/`                                                          | Idle                                        |
-| `/?origin=Enschede&destination=Hengelo&date=…&passengers=2`  | Loading, then results                       |
-| `/?passengers=2&date=…&destination=Hengelo&origin=Enschede`  | Same; order irrelevant                      |
-| `/?origin=enschede+&destination=HENGELO&date=…&passengers=1` | Results; trim and case folded               |
-| `/?…&utm_source=mail`                                        | Results; unknown key ignored                |
-| `/?origin=Ensch&…`                                           | No results; partial names do not match      |
-| `/?origin=Enschede&destination=Amsterdam&…`                  | No results; unknown station is not an error |
-| `/?…&date=2025-04-20&…`                                      | Validation error: past date; API not called |
-| `/?…&date=20-10-2026&…`                                      | Validation error: date format               |
-| `/?…&passengers=11`                                          | Validation error: out of range              |
-| `/?origin=Enschede&destination=Hengelo&date=…`               | Validation error: passengers missing        |
-| `/?origin=Enschede&origin=Almelo&…`                          | Results from Enschede; first value wins     |
-| `/?origin=error&…`                                           | Error state with retry                      |
-| `/?origin=%3Cscript%3E…`                                     | No results; rendered as text only           |
+| Address                                                      | Page state                                        |
+| ------------------------------------------------------------ | ------------------------------------------------- |
+| `/`                                                          | Idle                                              |
+| `/?origin=Enschede&destination=Hengelo&date=…&passengers=2`  | Loading, then results                             |
+| `/?passengers=2&date=…&destination=Hengelo&origin=Enschede`  | Same; order irrelevant                            |
+| `/?origin=enschede+&destination=HENGELO&date=…&passengers=1` | Results; trim and case folded                     |
+| `/?…&utm_source=mail`                                        | Results; unknown key ignored                      |
+| `/?origin=Ensch&…`                                           | Validation error: partial name; API not called    |
+| `/?origin=Enschede&destination=Amsterdam&…`                  | Validation error: unknown station; API not called |
+| `/?…&date=2025-04-20&…`                                      | Validation error: past date; API not called       |
+| `/?…&date=20-10-2026&…`                                      | Validation error: date format                     |
+| `/?…&passengers=11`                                          | Validation error: out of range                    |
+| `/?origin=Enschede&destination=Hengelo&date=…`               | Validation error: passengers missing              |
+| `/?origin=Enschede&origin=Almelo&…`                          | Results from Enschede; first value wins           |
+| `/?origin=Almelo&destination=Enschede&…`                     | Error state with retry                            |
+| `/?origin=%3Cscript%3E…`                                     | Validation error; rendered as text only           |
 
 Note: in a client-rendered Vite application there is no form without JavaScript, so the matching input names are a simpler codec, not a no-JavaScript fallback.
 
@@ -130,7 +130,7 @@ The given `SearchJourneys`, `JourneyParameters`, `Journeys`, `Journey` and `Amou
 - `timetable.ts` holds one row per service, in the brief's order, with `sourceDate` kept for traceability and prices in whole cents.
 - `buildJourneys(timetable, now)` creates a `Journey` for each service on each day from tomorrow (+1) to the Friday of next week (+8), with local `Date` instants from the day and time parts. It runs at call time, so a tab left open past midnight still shifts correctly.
 - `filterJourneys(journeys, parameters)` is pure and synchronous: origin and destination compared with `Intl.Collator` at base sensitivity after trimming; date compared on the local calendar day of departure; price is `unitPriceCents × nrOfPassengers`, divided by 100 once; sorted by departure ascending; returned frozen to honour `ReadonlyArray`.
-- The async wrapper adds the delay (about 500 ms by default) and two typed errors: `InvalidParametersError` when the API's own check fails, and `SearchError` when the origin is `error`. The UI shows both as the error state; tests tell them apart.
+- The async wrapper adds the delay (about 500 ms by default) and two typed errors: `InvalidParametersError` when the API's own check fails, and `SearchError` for the route Almelo to Enschede, the one route the timetable never serves and so the one failure trigger that passes validation (decision 25). The UI shows both as the error state; tests tell them apart.
 
 Prefix and fuzzy matching are deliberately absent from the search. In production rail systems a typed name is resolved to a station in a separate lookup step and the journey search is exact. That lookup is `suggestStations`, the default instance of `createSuggestStations({ delayMs })` (about 150 ms): the station list is derived from the timetable, and `matchStations(query)` returns the stations whose name starts with the trimmed query, compared with the same collator the search uses; an empty query lists every station. Both API functions are injected together through `ApiProvider`.
 
@@ -140,13 +140,14 @@ The timetable carries no station time zone; a 09:00 departure is built in the br
 
 One validator, `validateJourneyParameters(raw, now)`, turns a record of raw strings into either a `ValidJourneyParameters` or a map of field to message. The form action and the URL parser both call it. `ValidJourneyParameters` is a branded type that only the validator can construct; `createSearchJourneys`'s wrapper and the query hook accept only that type, so the compiler proves the API cannot be called with unvalidated input.
 
-| Rule                                                                  | Message                             |
-| --------------------------------------------------------------------- | ----------------------------------- |
-| Origin non-empty after trimming, at most 100 characters               | Enter an origin                     |
-| Destination non-empty, at most 100 characters                         | Enter a destination                 |
-| Destination differs from origin after normalisation                   | Destination must differ from origin |
-| Date is `yyyy-mm-dd`, today or later, compared as local calendar days | Choose a date from today onwards    |
-| Passengers is an integer from 1 to 10                                 | Choose between 1 and 10 passengers  |
+| Rule                                                                                        | Message                             |
+| ------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Origin non-empty after trimming, at most 100 characters                                     | Enter an origin                     |
+| Destination non-empty, at most 100 characters                                               | Enter a destination                 |
+| Origin and destination are stations the timetable serves, compared like the search compares | Choose a station from the list      |
+| Destination differs from origin after normalisation                                         | Destination must differ from origin |
+| Date is `yyyy-mm-dd`, today or later, compared as local calendar days                       | Choose a date from today onwards    |
+| Passengers is an integer from 1 to 10                                                       | Choose between 1 and 10 passengers  |
 
 The form:
 
@@ -307,14 +308,14 @@ Deliberately not done, and when it would be: memoisation, when a profile shows w
 
 ## Testing
 
-| Layer         | What is tested                                                                                                                                                                                              | Tool                          |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `model`       | Validator rules and boundaries, including today is valid; URL codec round trip; `localDate` write and read paths under Europe/Amsterdam and America/New_York; duration maths; formatters with fixed locales | Vitest                        |
-| `api`         | Fixture builds 8 × 8 journeys; matching rules; case and whitespace folding; totals in whole cents; sort order; frozen result; error trigger; invalid parameters rejected                                    | Vitest                        |
-| hook          | The five states; stale response never shown                                                                                                                                                                 | Vitest, Testing Library       |
-| components    | Invalid submit shows the field messages, announces the count and focuses the first invalid field; valid submit calls `onSearch`; URL on load renders each state; table text content                         | Testing Library, `user-event` |
-| accessibility | No axe violations in each state and in the form with errors                                                                                                                                                 | `vitest-axe`                  |
-| end to end    | Empty form to results; invalid URL shows the field message and never calls the API; origin `error` shows retry; the same three at 375 px                                                                    | Playwright                    |
+| Layer         | What is tested                                                                                                                                                                                                           | Tool                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
+| `model`       | Validator rules and boundaries, including today is valid; URL codec round trip; `localDate` write and read paths under Europe/Amsterdam and America/New_York; duration maths; formatters with fixed locales              | Vitest                        |
+| `api`         | Fixture builds 8 × 8 journeys; matching rules; case and whitespace folding; totals in whole cents; sort order; frozen result; error trigger; invalid parameters rejected                                                 | Vitest                        |
+| hook          | The five states; stale response never shown                                                                                                                                                                              | Vitest, Testing Library       |
+| components    | Invalid submit shows the field messages, announces the count and focuses the first invalid field; valid submit calls `onSearch`; URL on load renders each state; table text content                                      | Testing Library, `user-event` |
+| accessibility | No axe violations in each state and in the form with errors                                                                                                                                                              | `vitest-axe`                  |
+| end to end    | Empty form to results; invalid URL shows the field message and never calls the API; an unknown station typed or in the URL shows its message and never searches; Almelo to Enschede shows retry; the same five at 375 px | Playwright                    |
 
 Conventions: tests in a `__tests__` folder next to the code they cover, named `*.test.ts(x)`; queries by role and label only, never test ids; interactions through `user-event`; no snapshots; `it.each` tables for rules; the mock injected through `ApiProvider` with `createSearchJourneys({ delayMs: 0, now })` rather than `vi.mock`; fake timers only where the delay itself is under test; coverage thresholds of 100 % on `model`, `api` and `shared/lib`, none on `ui`. Every bug found during development gets a failing test first.
 
@@ -355,7 +356,7 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 
 ## Considered and not adopted
 
-- Zod: one schema for two input sources is the real argument; declined because two of the five rules need custom code regardless and there is one schema in the whole app.
+- Zod: one schema for two input sources is the real argument; declined because three of the six rules need custom code regardless and there is one schema in the whole app.
 - React Router or TanStack Router: a router for a page with no routes.
 - A hand-written reducer instead of TanStack Query: defensible for one call; see Data fetching for why the library was chosen.
 - `use()` with Suspense: not a data-fetching solution on its own.
