@@ -77,15 +77,15 @@ describe("parseSearchParams", () => {
 });
 
 describe("toSearchParams", () => {
-  it("writes the four keys in contract order with encoding", () => {
+  it("writes the four keys in contract order, trimmed", () => {
     const value = validated({
-      origin: "Den Haag",
-      destination: "Hengelo & Borne",
+      origin: " Enschede ",
+      destination: "Hengelo",
       date: "2026-10-21",
       passengers: "3",
     });
     expect(toSearchParams(value)).toBe(
-      "origin=Den+Haag&destination=Hengelo+%26+Borne&date=2026-10-21&passengers=3",
+      "origin=Enschede&destination=Hengelo&date=2026-10-21&passengers=3",
     );
   });
 

@@ -9,20 +9,26 @@
  *   ValidJourneyParameters, with trimmed names, a local-midnight Date and
  *   an integer passenger count. This is the only file that constructs it.
  * - Rules and messages from docs/architecture.md, "Form and validation".
+ * - Origin and destination must be stations the timetable serves
+ *   (decision 25). The list is the api layer's frozen constant, derived
+ *   from the timetable, so this function stays pure and the rule cannot
+ *   drift from the data.
  *
  * Why not Zod, for example:
  * The strongest argument for a schema library is one schema
- * for two input sources, which is exactly this file's job. But two of the
- * five rules (the local calendar-day comparison and the collator-based
- * "destination differs from origin") need custom code either way, and this
- * is the only schema in the application, so a dependency would be carried
- * for three string checks. See docs/decisions.md, entry 05.
+ * for two input sources, which is exactly this file's job. But three of the
+ * six rules (the local calendar-day comparison and the collator-based
+ * "destination differs from origin" and "is a known station") need custom
+ * code either way, and this is the only schema in the application, so a
+ * dependency would be carried for three string checks. See
+ * docs/decisions.md, entry 05.
  */
 import { isSameText } from "../../../shared/lib/text.ts";
 import {
   parseLocalDate,
   startOfLocalDay,
 } from "../../../shared/lib/localDate.ts";
+import { stations } from "../api/stations.ts";
 import { validationMessages } from "./strings.ts";
 import type { ValidJourneyParameters } from "./types.ts";
 
@@ -48,6 +54,11 @@ function parseStation(value: string | null): string | null {
   return trimmed.length > 0 && trimmed.length <= MAX_STATION_LENGTH
     ? trimmed
     : null;
+}
+
+/** True when the trimmed name is one the timetable serves, compared like the search compares. */
+function isKnownStation(name: string): boolean {
+  return stations.some((station) => isSameText(station.name, name));
 }
 
 function parseTravelDate(value: string | null, now: Date): Date | null {
@@ -80,9 +91,13 @@ export function validateJourneyParameters(
 
   if (origin === null) {
     errors.origin = validationMessages.origin;
+  } else if (!isKnownStation(origin)) {
+    errors.origin = validationMessages.unknownStation;
   }
   if (destination === null) {
     errors.destination = validationMessages.destination;
+  } else if (!isKnownStation(destination)) {
+    errors.destination = validationMessages.unknownStation;
   } else if (origin !== null && isSameText(origin, destination)) {
     errors.destination = validationMessages.sameStation;
   }

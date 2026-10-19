@@ -155,6 +155,39 @@ describe("SearchForm", () => {
     expect(destination()).toHaveFocus();
   });
 
+  it("rejects an unknown station on its own field and focuses it", async () => {
+    const { user, onSearch } = await renderForm();
+    await user.type(origin(), typed("Zwolle"));
+    await user.type(destination(), typed("Hengelo"));
+    await user.click(submit());
+
+    expect(origin()).toHaveFocus();
+    expect(origin()).toHaveAttribute("aria-invalid", "true");
+    expect(origin()).toHaveAccessibleDescription(
+      "Choose a station from the list",
+    );
+    expect(origin()).toHaveValue("Zwolle");
+    expect(destination()).not.toHaveAttribute("aria-invalid");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "1 field needs attention",
+    );
+    expect(onSearch).not.toHaveBeenCalled();
+  });
+
+  it("clears the unknown-station message once the full name is typed", async () => {
+    const { user } = await renderForm();
+    await user.type(origin(), typed("Ensch"));
+    await user.click(submit());
+    expect(
+      screen.getByText("Choose a station from the list"),
+    ).toBeInTheDocument();
+
+    await user.type(origin(), "ede");
+    expect(
+      screen.queryByText("Choose a station from the list"),
+    ).not.toBeInTheDocument();
+  });
+
   it("rejects passengers out of range", async () => {
     const { user } = await renderForm();
     const passengers = screen.getByLabelText("Passengers");

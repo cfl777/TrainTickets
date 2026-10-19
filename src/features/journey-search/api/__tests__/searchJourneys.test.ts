@@ -106,10 +106,16 @@ describe("createSearchJourneys", () => {
     await expect(search(base)).resolves.toEqual(filterJourneys(journeys, base));
   });
 
-  it("rejects with SearchError when the origin is error, in any casing", async () => {
-    await expect(search({ ...base, origin: " ERROR " })).rejects.toBeInstanceOf(
-      SearchError,
-    );
+  it("rejects with SearchError for Almelo to Enschede, in any casing", async () => {
+    await expect(
+      search({ ...base, origin: " ALMELO ", destination: "enschede" }),
+    ).rejects.toBeInstanceOf(SearchError);
+  });
+
+  it("does not fail the reverse route, Enschede to Almelo", async () => {
+    await expect(
+      search({ ...base, origin: "Enschede", destination: "Almelo" }),
+    ).resolves.toHaveLength(2);
   });
 
   it.each<[Partial<typeof base>, string]>([

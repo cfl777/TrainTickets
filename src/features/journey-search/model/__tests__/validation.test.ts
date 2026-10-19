@@ -37,8 +37,10 @@ describe("validateJourneyParameters", () => {
     expect(errorsOf({ origin })).toEqual({ origin: validationMessages.origin });
   });
 
-  it("caps station names at 100 characters", () => {
-    expect(errorsOf({ origin: "a".repeat(100) })).toEqual({});
+  it("caps station names at 100 characters before the station check", () => {
+    expect(errorsOf({ origin: "a".repeat(100) })).toEqual({
+      origin: validationMessages.unknownStation,
+    });
     expect(errorsOf({ origin: "a".repeat(101) })).toEqual({
       origin: validationMessages.origin,
     });
@@ -47,6 +49,39 @@ describe("validateJourneyParameters", () => {
   it.each([null, "", "   "])("rejects destination %j", (destination) => {
     expect(errorsOf({ destination })).toEqual({
       destination: validationMessages.destination,
+    });
+  });
+
+  it.each(["Zwolle", "Ensch", "Enschedee", "<script>", "error"])(
+    "rejects the unknown origin %j",
+    (origin) => {
+      expect(errorsOf({ origin })).toEqual({
+        origin: validationMessages.unknownStation,
+      });
+    },
+  );
+
+  it.each(["Amsterdam", "Hen"])(
+    "rejects the unknown destination %j",
+    (destination) => {
+      expect(errorsOf({ destination })).toEqual({
+        destination: validationMessages.unknownStation,
+      });
+    },
+  );
+
+  it.each([" almelo ", "ALMELO", "Álmelo"])(
+    "accepts %j as a known station, ignoring case, accents and spaces",
+    (name) => {
+      expect(errorsOf({ origin: name })).toEqual({});
+      expect(errorsOf({ destination: name })).toEqual({});
+    },
+  );
+
+  it("reports both unknown stations, even when they are the same text", () => {
+    expect(errorsOf({ origin: "Zwolle", destination: "zwolle" })).toEqual({
+      origin: validationMessages.unknownStation,
+      destination: validationMessages.unknownStation,
     });
   });
 

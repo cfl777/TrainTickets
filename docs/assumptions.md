@@ -28,9 +28,9 @@ The brief asks for assumptions to be noted where it is unclear. Each entry below
 
 **The ambiguity:** whether "enschede ", "Ensch" or "Enschedé" should find Enschede.
 
-**Decided:** exact match after normalisation. Names are trimmed and compared with `Intl.Collator` at base sensitivity, so case and accents are ignored. Partial names do not match. An unknown or partial name is an ordinary empty result, not an error.
+**Decided:** exact match after normalisation. Names are trimmed and compared with `Intl.Collator` at base sensitivity, so case and accents are ignored. Partial names do not match. The search itself treats an unknown or partial name as an ordinary empty result, but the page never sends one: the validator rejects any name that is not in the station list, with the same comparison (decision 25).
 
-**Consequence:** search is deterministic and never guesses. Suggestions for partial names belong in a separate station-lookup step, as in production rail systems; that step is a documented stretch item, not part of the search.
+**Consequence:** search is deterministic and never guesses. Suggestions for partial names belong in a separate station-lookup step, as in production rail systems; that step is the station lookup (decision 23), not part of the search.
 
 ## 4. What "travel date" means
 

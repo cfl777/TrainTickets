@@ -7,6 +7,7 @@
 export const validationMessages = {
   origin: "Enter an origin",
   destination: "Enter a destination",
+  unknownStation: "Choose a station from the list",
   sameStation: "Destination must differ from origin",
   date: "Choose a date from today onwards",
   passengers: "Choose between 1 and 10 passengers",

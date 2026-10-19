@@ -9,8 +9,9 @@
  *   the price is the total for the party in whole cents divided once
  *   (assumption 2), sorted by departure, returned frozen.
  * - Two typed errors: InvalidParametersError when the API's own check
- *   fails, SearchError when the origin is "error", the one deterministic
- *   failure trigger. No random latency, no random failures.
+ *   fails, SearchError for Almelo to Enschede, the one route the timetable
+ *   never serves and so the one deterministic failure trigger that passes
+ *   validation (decision 25). No random latency, no random failures.
  */
 import { isSameLocalDay } from "../../../shared/lib/localDate.ts";
 import { isSameText } from "../../../shared/lib/text.ts";
@@ -32,7 +33,7 @@ export class SearchError extends Error {
 }
 
 const DEFAULT_DELAY_MS = 500;
-const ERROR_ORIGIN = "error";
+const ERROR_ROUTE = { origin: "Almelo", destination: "Enschede" } as const;
 const MIN_PASSENGERS = 1;
 const MAX_PASSENGERS = 10;
 
@@ -112,7 +113,10 @@ export function createSearchJourneys({
     assertParameters(parameters);
     await delay(delayMs);
 
-    if (isSameText(parameters.origin, ERROR_ORIGIN)) {
+    if (
+      isSameText(parameters.origin, ERROR_ROUTE.origin) &&
+      isSameText(parameters.destination, ERROR_ROUTE.destination)
+    ) {
       throw new SearchError("The journey search failed");
     }
 

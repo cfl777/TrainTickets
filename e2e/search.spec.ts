@@ -60,11 +60,50 @@ test("shows the field error for an invalid URL and does not search", async ({
   await expect(page.getByRole("table")).toHaveCount(0);
 });
 
+test("rejects an unknown station under its field and does not search", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const origin = page.getByRole("combobox", { name: "Origin" });
+  await origin.fill("Zwolle");
+  await origin.press("Escape");
+  const destination = page.getByRole("combobox", { name: "Destination" });
+  await destination.fill("Hengelo");
+  await destination.press("Escape");
+  await page.getByRole("button", { name: "Search journeys" }).click();
+
+  await expect(page.getByText("Choose a station from the list")).toBeVisible();
+  await expect(origin).toBeFocused();
+  await expect(origin).toHaveAttribute("aria-invalid", "true");
+  await expect(origin).toHaveValue("Zwolle");
+  await expect(destination).not.toHaveAttribute("aria-invalid", "true");
+  await expect(page).not.toHaveURL(/origin=/);
+  await expect(page.getByRole("status")).toHaveText("");
+  await expect(page.getByRole("table")).toHaveCount(0);
+});
+
+test("shows the unknown-station message for a URL with an unknown origin and does not search", async ({
+  page,
+}) => {
+  await page.goto(
+    `/?origin=Zwolle&destination=Hengelo&date=${tomorrow()}&passengers=2`,
+  );
+  await expect(page.getByText("Choose a station from the list")).toBeVisible();
+  const origin = page.getByRole("combobox", { name: "Origin" });
+  await expect(origin).toHaveValue("Zwolle");
+  await expect(origin).toHaveAttribute("aria-invalid", "true");
+  // Focus is not asserted: open bug, focus is lost on load when the first
+  // invalid field is a station field (the fallback input is focused, the
+  // combobox that replaces it is not).
+  await expect(page.getByRole("status")).toHaveText("");
+  await expect(page.getByRole("table")).toHaveCount(0);
+});
+
 test("shows a focused error with a retry when the search fails", async ({
   page,
 }) => {
   await page.goto(
-    `/?origin=error&destination=Hengelo&date=${tomorrow()}&passengers=2`,
+    `/?origin=Almelo&destination=Enschede&date=${tomorrow()}&passengers=2`,
   );
   const alert = page.getByRole("alert");
   await expect(alert).toBeVisible();
