@@ -44,6 +44,8 @@ import {
   useStationSuggestions,
   type Station,
 } from "../model/useStationSuggestions.ts";
+import { MAX_STATION_LENGTH } from "../model/validation.ts";
+import { RouteDot } from "./RouteDot.tsx";
 import styles from "./StationComboBox.module.css";
 
 export type StationFieldProps = Readonly<{
@@ -86,9 +88,8 @@ export function StationComboBox({
     .map((station) => station.id);
   const takenTag =
     id === "destination" ? formStrings.ticket.from : formStrings.ticket.to;
-  const takenGlyph = cx(
-    styles.dot,
-    id === "destination" ? undefined : styles.dotTo,
+  const takenGlyph = (
+    <RouteDot filled={id !== "destination"} className={cx(styles.glyph)} />
   );
   // The text-node space before the tag keeps the name two words for a screen reader.
   const takenMark = (
@@ -128,7 +129,7 @@ export function StationComboBox({
           ref={inputRef}
           className={cx(styles.input)}
           placeholder={placeholder}
-          maxLength={100}
+          maxLength={MAX_STATION_LENGTH}
           autoCapitalize="words"
           spellCheck={false}
           autoComplete="off"
@@ -162,9 +163,7 @@ export function StationComboBox({
             >
               {({ isDisabled }) => (
                 <>
-                  {isDisabled ? (
-                    <span className={takenGlyph} aria-hidden="true" />
-                  ) : null}
+                  {isDisabled ? takenGlyph : null}
                   <strong>{station.name.slice(0, typedLength)}</strong>
                   {station.name.slice(typedLength)}
                   {isDisabled ? takenMark : null}

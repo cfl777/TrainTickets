@@ -33,7 +33,9 @@ export function ApiProvider({
 function useApi(): Api {
   const api = use(ApiContext);
   if (api === null) {
-    throw new Error("useSearchApi must be used inside an ApiProvider");
+    throw new Error(
+      "useSearchApi and useSuggestStations must be used inside an ApiProvider",
+    );
   }
   return api;
 }

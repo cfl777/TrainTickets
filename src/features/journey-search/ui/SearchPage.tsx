@@ -17,7 +17,6 @@
  */
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "../../../shared/hooks/useSearchParams.ts";
-import { cx } from "../../../shared/lib/cx.ts";
 import { toSearchParams } from "../model/searchParams.ts";
 import {
   appTitle,
@@ -26,6 +25,7 @@ import {
   searchTitle,
 } from "../model/strings.ts";
 import { useJourneySearch } from "../model/useJourneySearch.ts";
+import { RouteDot } from "./RouteDot.tsx";
 import { SearchForm } from "./SearchForm.tsx";
 import styles from "./SearchPage.module.css";
 import { SearchResults } from "./SearchResults.tsx";
@@ -39,16 +39,16 @@ export function SearchPage() {
   const resultsRef = useRef<HTMLElement>(null);
   const previousSearch = useRef(search);
 
-  const searching =
+  const hasSearch =
     state.kind === "loading" ||
     state.kind === "success" ||
     state.kind === "error";
-  const origin = searching ? (state.raw.origin ?? "").trim() : "";
-  const destination = searching ? (state.raw.destination ?? "").trim() : "";
+  const origin = hasSearch ? (state.raw.origin ?? "").trim() : "";
+  const destination = hasSearch ? (state.raw.destination ?? "").trim() : "";
 
   useEffect(() => {
-    document.title = searching ? searchTitle(origin, destination) : appTitle;
-  }, [searching, origin, destination]);
+    document.title = hasSearch ? searchTitle(origin, destination) : appTitle;
+  }, [hasSearch, origin, destination]);
 
   useEffect(() => {
     if (previousSearch.current === search) {
@@ -56,7 +56,7 @@ export function SearchPage() {
     }
     previousSearch.current = search;
     const results = resultsRef.current;
-    if (!searching || results === null) {
+    if (!hasSearch || results === null) {
       return;
     }
     results.focus({ preventScroll: true });
@@ -66,7 +66,7 @@ export function SearchPage() {
         block: "start",
       });
     }
-  }, [search, searching]);
+  }, [search, hasSearch]);
 
   return (
     <main>
@@ -76,13 +76,11 @@ export function SearchPage() {
             <h1>{appTitle}</h1>
             <p className={styles.route} aria-hidden="true">
               <span className={styles.stop}>
-                <span className={styles.dot} />{" "}
-                <span>{formStrings.ticket.from}</span>
+                <RouteDot /> <span>{formStrings.ticket.from}</span>
               </span>
               <span className={styles.line} />
               <span className={styles.stop}>
-                <span className={cx(styles.dot, styles.dotTo)} />{" "}
-                <span>{formStrings.ticket.to}</span>
+                <RouteDot filled /> <span>{formStrings.ticket.to}</span>
               </span>
             </p>
           </div>
@@ -102,7 +100,7 @@ export function SearchPage() {
         ref={resultsRef}
         aria-label={resultStrings.resultsRegion}
         tabIndex={-1}
-        className={styles.results}
+        className={styles.resultsRegion}
       >
         <SearchResults state={state} />
       </section>

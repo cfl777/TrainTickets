@@ -11,10 +11,10 @@
  */
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { Station } from "../api/stations.ts";
+import { useSuggestStations } from "./useSearchApi.tsx";
 
 /** Re-exported so the ui layer never reaches into api. */
 export type { Station };
-import { useSuggestStations } from "./useSearchApi.tsx";
 
 const EMPTY: readonly Station[] = [];
 

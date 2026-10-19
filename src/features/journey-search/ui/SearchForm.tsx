@@ -156,6 +156,8 @@ export function SearchForm({
     { errors: initialErrors, values: null, attempt: 0 },
   );
 
+  // Errors from re-validating on change carry the attempt they belong to, so
+  // the next failed submit replaces them without an effect.
   const [live, setLive] = useState<{
     attempt: number;
     errors: ValidationErrors;
