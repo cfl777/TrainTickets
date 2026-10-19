@@ -19,6 +19,9 @@ test("searches from an empty form to a results table", async ({ page }) => {
   // The station fields are comboboxes once their chunk has loaded.
   const origin = page.getByRole("combobox", { name: "Origin" });
   await origin.pressSequentially("En");
+  // The list keeps the previous matches while the new ones load, so wait for
+  // the filtered list; otherwise ArrowDown lands on the first of the old one.
+  await expect(page.getByRole("option")).toHaveCount(1);
   await expect(page.getByRole("option", { name: "Enschede" })).toBeVisible();
   await origin.press("ArrowDown");
   await origin.press("Enter");
@@ -197,6 +200,9 @@ test("greys the origin out as a destination and objects at once when it is typed
   await page.goto("/");
   const origin = page.getByRole("combobox", { name: "Origin" });
   await origin.pressSequentially("En");
+  // The list keeps the previous matches while the new ones load, so wait for
+  // the filtered list; otherwise ArrowDown lands on the first of the old one.
+  await expect(page.getByRole("option")).toHaveCount(1);
   await expect(page.getByRole("option", { name: "Enschede" })).toBeVisible();
   await origin.press("ArrowDown");
   await origin.press("Enter");
