@@ -84,7 +84,7 @@ src/
         strings.ts                  all UI copy
         useSearchApi.tsx            ApiProvider, useSearchApi, useSuggestStations: inject the two API functions
         useJourneySearch.ts         parse → validate → useQuery → rows; returns a union
-        useStationSuggestions.ts    useQuery per normalised prefix; previous matches kept while loading
+        useStationSuggestions.ts    useQuery per normalised prefix; while the next prefix loads, only previous rows that still match are kept
         __tests__/
       ui/                           presentational components + the page
         SearchPage.tsx (+ .module.css)  composition only
@@ -294,15 +294,15 @@ The brief asks that no invalid or insecure request reaches the search API. The A
 
 ## Performance
 
-| Measure                      | Budget                                                                                                                                           | How                                           |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
-| Initial JavaScript           | under 100 KB gzipped (measured 84.8 at commit `aaa307d`: React and ReactDOM 67.8, TanStack Query client and `useQuery` about 8, the app about 9) | `pnpm build` output and the size-check script |
-| Station lookup chunk         | under 70 KB gzipped, loaded on demand after the first render (measured 60.2)                                                                     | a second size-limit entry                     |
-| Lighthouse performance       | 95 or above, mobile and desktop                                                                                                                  | recorded in the README                        |
-| Layout shift on state change | 0                                                                                                                                                | reserved results height                       |
-| Input delay                  | none from React                                                                                                                                  | uncontrolled inputs                           |
-| Font requests                | 0                                                                                                                                                | system font stack                             |
-| Devtools in production       | 0 bytes                                                                                                                                          | lazy import behind `import.meta.env.DEV`      |
+| Measure                      | Budget                                                                                                                                             | How                                           |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Initial JavaScript           | under 100 KB gzipped (measured 85.1 at commit `1430ff5`: React and ReactDOM 67.8, TanStack Query client and `useQuery` about 8, the app about 9.3) | `pnpm build` output and the size-check script |
+| Station lookup chunk         | under 70 KB gzipped, loaded on demand after the first render (measured 60.2; the figure has not moved since the lookup landed)                     | a second size-limit entry                     |
+| Lighthouse performance       | 95 or above, mobile and desktop                                                                                                                    | recorded in the README                        |
+| Layout shift on state change | 0                                                                                                                                                  | reserved results height                       |
+| Input delay                  | none from React                                                                                                                                    | uncontrolled inputs                           |
+| Font requests                | 0                                                                                                                                                  | system font stack                             |
+| Devtools in production       | 0 bytes                                                                                                                                            | lazy import behind `import.meta.env.DEV`      |
 
 Formatters are created once per locale. Stale responses are never rendered. Vite's default modern browser target, no legacy plugin.
 
@@ -325,7 +325,7 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 
 ## Tooling
 
-- TypeScript: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noFallthroughCasesInSwitch`, `verbatimModuleSyntax`; `lib` includes ES2025 for `Intl.DurationFormat`; `tsc --noEmit` as its own script.
+- TypeScript: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noFallthroughCasesInSwitch`, `verbatimModuleSyntax`; `lib` includes ES2025 for `Intl.DurationFormat`; `tsc -b` as its own script.
 - ESLint flat config: `typescript-eslint` `strictTypeChecked` and `stylisticTypeChecked` with `projectService`; `react-hooks`; `jsx-a11y` strict; `@tanstack/eslint-plugin-query`; `eslint-config-prettier` last; the import rules above as `no-restricted-imports` overrides.
 - Prettier with a near-empty configuration; formats CSS as well, so no Stylelint.
 - `.editorconfig`; `.vscode/extensions.json` and `settings.json` for format and fix on save.
@@ -347,7 +347,7 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 | `vitest` (with `@vitest/coverage-v8`), `jsdom`                                                                                                                      | dev     | Test runner native to Vite                                                                            |
 | `@testing-library/react` (with its `@testing-library/dom` peer), `@testing-library/user-event`, `@testing-library/jest-dom`                                         | dev     | Tests through roles and labels; realistic interactions; readable DOM matchers                         |
 | `vitest-axe`                                                                                                                                                        | dev     | axe-core in every component test                                                                      |
-| `@playwright/test`                                                                                                                                                  | dev     | Three real-browser tests and a mobile viewport                                                        |
+| `@playwright/test`                                                                                                                                                  | dev     | Real-browser journeys on desktop and a 375 px viewport, against the production build                  |
 | `eslint` (with `@eslint/js`), `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, `@tanstack/eslint-plugin-query`, `eslint-config-prettier` | dev     | Type-aware lint, hook rules, static accessibility, query-key correctness, no conflicts with Prettier  |
 | `prettier`                                                                                                                                                          | dev     | Formatting without debate                                                                             |
 | `lint-staged`, `simple-git-hooks`                                                                                                                                   | dev     | Pre-commit formatting and lint on staged files                                                        |

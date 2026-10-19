@@ -37,16 +37,16 @@ Tests sit in a `__tests__` folder beside the files they cover. The pure modules 
 
 ## Try it without installing
 
-Hosted preview: https://train-journeys.vercel.app. Only `main` is deployed; at the time of writing the site reflects commit `aaa307d`. Added for quick initial checks without starting the project; the local route above stays the reference.
+Hosted preview: https://train-journeys.vercel.app. Only `main` is deployed; at the time of writing the site reflects commit `1430ff5`. Added for quick initial checks without starting the project; the local route above stays the reference.
 
 ## Build numbers
 
-Measured on 19 October 2026 at commit `aaa307d`: the sizes from `pnpm build` (size-limit, gzip), the scores from Lighthouse 13.5 run against the hosted preview with the mobile and desktop presets. The first mobile run of a cold browser session scored 93 (LCP 1.6 s, 160 ms blocking); the repeats scored 99 with no blocking time, so 99 is reported with that note. The results page scored 100 on mobile.
+Sizes from `pnpm build` (size-limit, gzip) on 20 October 2026 at commit `1430ff5`. Lighthouse 13.5 scores from 19 October 2026 at commit `aaa307d`, run against the hosted preview with the mobile and desktop presets; the JavaScript grew by 0.3 kB between the two commits, so the scores were not re-run. The first mobile run of a cold browser session scored 93 (LCP 1.6 s, 160 ms blocking); the repeats scored 99 with no blocking time, so 99 is reported with that note. The results page scored 100 on mobile.
 
 | Measure                     | Budget       | Measured                |
 | --------------------------- | ------------ | ----------------------- |
-| Initial JavaScript, gzipped | under 100 KB | 84.77 kB                |
-| Station lookup chunk        | under 70 KB  | 60.2 kB, on demand      |
+| Initial JavaScript, gzipped | under 100 KB | 85.09 kB                |
+| Station lookup chunk        | under 70 KB  | 60.19 kB, on demand     |
 | Lighthouse performance      | 95 or above  | 99 mobile, 100 desktop  |
 | Lighthouse accessibility    | 100          | 100 mobile, 100 desktop |
 
