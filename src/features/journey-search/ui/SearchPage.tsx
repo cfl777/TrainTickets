@@ -3,7 +3,8 @@
  *
  * - Reads the URL through useSearchParams and the search state through
  *   useJourneySearch; renders the form inside a <search> landmark and the
- *   results below it.
+ *   results below it. The landmark holds the ticket card: the h1 in its
+ *   stub with a decorative route line, a perforation, then the form.
  * - The form is keyed on the search string, so a successful search resets
  *   it to fresh defaults from the URL and a shared link pre-fills it.
  * - Submitting writes the URL; the hook reacts to the URL (decision 04).
@@ -68,16 +69,28 @@ export function SearchPage() {
 
   return (
     <main>
-      <h1>{appTitle}</h1>
       <search>
-        <SearchForm
-          key={search}
-          defaultValues={state.kind === "idle" ? null : state.raw}
-          initialErrors={state.kind === "invalid" ? state.errors : null}
-          onSearch={(params) => {
-            setSearch(toSearchParams(params));
-          }}
-        />
+        <div className={styles.ticket}>
+          <div className={styles.stub}>
+            <h1>{appTitle}</h1>
+            <p className={styles.route} aria-hidden="true">
+              <span className={styles.dot} />{" "}
+              <span>{formStrings.ticket.from}</span>
+              <span className={styles.line} />
+              <span className={[styles.dot, styles.dotTo].join(" ")} />{" "}
+              <span>{formStrings.ticket.to}</span>
+            </p>
+          </div>
+          <div className={styles.perforation} aria-hidden="true" />
+          <SearchForm
+            key={search}
+            defaultValues={state.kind === "idle" ? null : state.raw}
+            initialErrors={state.kind === "invalid" ? state.errors : null}
+            onSearch={(params) => {
+              setSearch(toSearchParams(params));
+            }}
+          />
+        </div>
         <p className={styles.note}>{formStrings.stationsNote}</p>
       </search>
       <section

@@ -1,3 +1,85 @@
+/* The form card is a ticket (decision 24): the heading in its stub, a
+   perforation above the fields, all CSS, tokens only. */
+.ticket {
+  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-left: 6px solid var(--color-accent-soft);
+  border-radius: var(--radius-card);
+  margin-bottom: var(--space-6);
+  overflow: hidden;
+}
+
+.stub {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+}
+
+.stub h1 {
+  margin: 0;
+}
+
+/* Decorative route line: origin ring, track, filled destination dot. */
+.route {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 3px solid var(--color-accent);
+  background: var(--color-card);
+}
+
+.dotTo {
+  background: var(--color-accent);
+}
+
+.line {
+  width: 48px;
+  height: 2px;
+  background: var(--color-border);
+}
+
+/* Dashed tear line with a half-circle notch at each edge of the card. */
+.perforation {
+  position: relative;
+  height: 0;
+  border-top: 2px dashed var(--color-line);
+  margin: 0 var(--space-4);
+}
+
+.perforation::before,
+.perforation::after {
+  content: "";
+  position: absolute;
+  top: -12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-background);
+  border: 1px solid var(--color-line);
+}
+
+.perforation::before {
+  left: calc(-1 * var(--space-4) - 14px);
+}
+
+.perforation::after {
+  right: calc(-1 * var(--space-4) - 11px);
+}
+
 /* Under the form card: 8 px above (the card leaves 24, so -16), inset to the
    card's content edge (6 px edge + 16 px padding), small and subtle. */
 .note {
@@ -15,4 +97,25 @@
 .results:focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-offset);
+}
+
+@media (min-width: 640px) {
+  .stub {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: var(--space-6) var(--space-6) var(--space-3);
+  }
+  .route {
+    padding-bottom: 0.4rem;
+  }
+  .perforation {
+    margin: 0 var(--space-6);
+  }
+  .perforation::before {
+    left: calc(-1 * var(--space-6) - 14px);
+  }
+  .perforation::after {
+    right: calc(-1 * var(--space-6) - 11px);
+  }
 }
