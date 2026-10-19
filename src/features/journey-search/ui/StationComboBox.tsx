@@ -18,6 +18,11 @@
  * - Loaded lazily by StationField: this module is the only one that
  *   imports react-aria-components, so Vite splits it out of the initial
  *   bundle.
+ * - The station the other field holds stays listed but disabled (decision
+ *   26): React Aria skips it with the arrow keys and announces it as
+ *   unavailable; the row shows the ticket's route glyph and the other
+ *   field's name, so a visitor sees why. It can still be typed, and the
+ *   form says so at once through onValueChange.
  */
 import { useState, type Ref } from "react";
 import {
@@ -30,6 +35,7 @@ import {
   ListBoxItem,
   Popover,
 } from "react-aria-components";
+import { isSameText } from "../../../shared/lib/text.ts";
 import fieldStyles from "../../../shared/ui/Field.module.css";
 import { ChevronDownIcon, MapPinIcon } from "../../../shared/ui/icons.tsx";
 import { formStrings } from "../model/strings.ts";
@@ -45,6 +51,10 @@ export type StationFieldProps = Readonly<{
   placeholder: string;
   defaultValue: string;
   error?: string;
+  /** The other field's current text; the matching station is listed but cannot be chosen. */
+  takenStation?: string;
+  /** Called with the text as it is typed or chosen; the form keeps both fields' texts. */
+  onValueChange?: (value: string) => void;
 }>;
 
 type Props = StationFieldProps &
@@ -65,11 +75,21 @@ export function StationComboBox({
   defaultValue,
   error,
   inputRef,
+  takenStation,
+  onValueChange,
 }: Props) {
   const [inputValue, setInputValue] = useState(defaultValue);
   const { stations, isLoading } = useStationSuggestions(inputValue);
   const typedLength = inputValue.trim().length;
   const invalid = error !== undefined;
+  const takenKeys = stations
+    .filter(
+      (station) =>
+        takenStation !== undefined && isSameText(station.name, takenStation),
+    )
+    .map((station) => station.id);
+  const takenTag =
+    id === "destination" ? formStrings.ticket.from : formStrings.ticket.to;
 
   return (
     <ComboBox
@@ -79,8 +99,12 @@ export function StationComboBox({
       )}
       name={id}
       items={stations}
+      disabledKeys={takenKeys}
       inputValue={inputValue}
-      onInputChange={setInputValue}
+      onInputChange={(value) => {
+        setInputValue(value);
+        onValueChange?.(value);
+      }}
       allowsCustomValue
       allowsEmptyCollection
       isRequired
@@ -129,8 +153,27 @@ export function StationComboBox({
               textValue={station.name}
               className={cx(styles.option)}
             >
-              <strong>{station.name.slice(0, typedLength)}</strong>
-              {station.name.slice(typedLength)}
+              {({ isDisabled }) => (
+                <>
+                  {isDisabled ? (
+                    <span
+                      className={cx(
+                        styles.dot,
+                        id === "destination" ? undefined : styles.dotTo,
+                      )}
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                  <strong>{station.name.slice(0, typedLength)}</strong>
+                  {station.name.slice(typedLength)}
+                  {isDisabled ? (
+                    <>
+                      {/* A real space, so the name is read as two words. */}{" "}
+                      <span className={styles.taken}>{takenTag}</span>
+                    </>
+                  ) : null}
+                </>
+              )}
             </ListBoxItem>
           )}
         </ListBox>

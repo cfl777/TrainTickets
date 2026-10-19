@@ -163,3 +163,33 @@ test("keeps the stub's route line inside the card, also at a large font size", a
   expect(large.pageOverflow).toBeLessThanOrEqual(0);
   expect(large.routeOverflow).toBeLessThanOrEqual(0);
 });
+
+test("greys the origin out as a destination and objects at once when it is typed anyway", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const origin = page.getByRole("combobox", { name: "Origin" });
+  await origin.pressSequentially("En");
+  await expect(page.getByRole("option", { name: "Enschede" })).toBeVisible();
+  await origin.press("ArrowDown");
+  await origin.press("Enter");
+  await expect(origin).toHaveValue("Enschede");
+
+  await page.getByRole("button", { name: "Show stations Destination" }).click();
+  await expect(
+    page.getByRole("option", { name: "Enschede Origin" }),
+  ).toHaveAttribute("aria-disabled", "true");
+  await expect(page.getByRole("option", { name: "Hengelo" })).toBeVisible();
+  await expect(page.getByText("3 stations")).toBeVisible();
+
+  const destination = page.getByRole("combobox", { name: "Destination" });
+  await destination.fill("Enschede");
+  await destination.press("Escape");
+  await expect(
+    page.getByText("Destination must differ from origin"),
+  ).toBeVisible();
+  await expect(destination).toHaveAttribute("aria-invalid", "true");
+  // Nothing was submitted: the address is unchanged and the count alert is absent.
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+});

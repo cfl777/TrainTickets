@@ -188,6 +188,68 @@ describe("SearchForm", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("says so at once when the destination is typed as the origin, before any submit", async () => {
+    const { user } = await renderForm();
+    await user.type(origin(), typed("Enschede"));
+    await user.type(destination(), typed("enschede"));
+
+    expect(
+      screen.getByText("Destination must differ from origin"),
+    ).toBeInTheDocument();
+    expect(destination()).toHaveAttribute("aria-invalid", "true");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("clears the same-station message when another origin is chosen from the list", async () => {
+    const { user } = await renderForm();
+    await user.type(destination(), typed("Enschede"));
+    await user.type(origin(), typed("Enschede"));
+    expect(
+      screen.getByText("Destination must differ from origin"),
+    ).toBeInTheDocument();
+
+    await user.clear(origin());
+    await user.type(origin(), "h");
+    await screen.findByRole("option", { name: "Hengelo" });
+    await user.keyboard("{ArrowDown}{Enter}");
+
+    expect(origin()).toHaveValue("Hengelo");
+    expect(
+      screen.queryByText("Destination must differ from origin"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("clears the same-station message when the origin changes, without nagging about the empty origin", async () => {
+    const { user } = await renderForm();
+    await user.type(origin(), typed("Enschede"));
+    await user.type(destination(), typed("Enschede"));
+    await user.clear(origin());
+    await user.keyboard("{Escape}");
+
+    expect(
+      screen.queryByText("Destination must differ from origin"),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Enter an origin")).not.toBeInTheDocument();
+    expect(destination()).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("greys the chosen origin out in the destination list", async () => {
+    const { user } = await renderForm();
+    await user.type(origin(), "en");
+    await user.click(await screen.findByRole("option", { name: "Enschede" }));
+    await user.click(
+      screen.getByRole("button", { name: "Show stations Destination" }),
+    );
+
+    expect(
+      await screen.findByRole("option", { name: "Enschede Origin" }),
+    ).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("option", { name: "Hengelo" })).not.toHaveAttribute(
+      "aria-disabled",
+    );
+    expect(screen.getByText("3 stations")).toBeInTheDocument();
+  });
+
   it("rejects passengers out of range", async () => {
     const { user } = await renderForm();
     const passengers = screen.getByLabelText("Passengers");

@@ -11,8 +11,10 @@
  *   to the first invalid field and a visually hidden alert says how many
  *   fields need attention, so screen-reader users learn what sighted users
  *   see. Each errored field clears its own message once valid; nothing nags
- *   before the first submit. Action-state errors take precedence over URL
- *   errors.
+ *   before the first submit, with one exception (decision 26): "destination
+ *   must differ from origin" shows the moment it becomes true, because the
+ *   visitor has just made that one choice. Action-state errors take
+ *   precedence over URL errors.
  * - React resets uncontrolled inputs after an action, so the action keeps
  *   the submitted values in state and the inputs read defaultValue from
  *   there first; a failed submit never wipes what was typed.
@@ -24,15 +26,25 @@
  *   exactly as before. The lookup keeps its text in React state, which the
  *   post-action reset would clear, so the two fields are keyed on the
  *   attempt and re-mount with the submitted values instead.
+ * - Each station field is told what the other one holds, so it can grey
+ *   that station out. Choosing from the lookup fires no change event, so
+ *   the fields report their text through a callback and the form keeps
+ *   both texts in state.
  */
-import { useActionState, useEffect, useState, type ChangeEvent } from "react";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 import { Field } from "../../../shared/ui/Field.tsx";
 import { CalendarIcon, UsersIcon } from "../../../shared/ui/icons.tsx";
 import {
   formatLocalDate,
   startOfLocalDay,
 } from "../../../shared/lib/localDate.ts";
-import { formStrings } from "../model/strings.ts";
+import { formStrings, validationMessages } from "../model/strings.ts";
 import type { ValidJourneyParameters } from "../model/types.ts";
 import {
   validateJourneyParameters,
@@ -84,15 +96,23 @@ function invalidFields(errors: ValidationErrors | null): JourneyField[] {
     : FIELDS.filter((field) => errors[field] !== undefined);
 }
 
-/** Keeps only the errors for fields that were already shown, so messages clear but never appear mid-typing. */
+/**
+ * Keeps only the errors for fields that were already shown, so messages
+ * clear but never appear mid-typing; the same-station message is the one
+ * that may appear (decision 26).
+ */
 function keepShown(
   errors: ValidationErrors,
-  shown: ValidationErrors,
+  shown: ValidationErrors | null,
 ): ValidationErrors {
   const kept: Partial<Record<JourneyField, string>> = {};
   for (const field of FIELDS) {
     const message = errors[field];
-    if (message !== undefined && shown[field] !== undefined) {
+    if (
+      message !== undefined &&
+      (shown?.[field] !== undefined ||
+        message === validationMessages.sameStation)
+    ) {
       kept[field] = message;
     }
   }
@@ -141,11 +161,9 @@ export function SearchForm({
     errors: ValidationErrors;
   } | null>(null);
   const shownErrors =
-    state.errors === null
-      ? null
-      : live !== null && live.attempt === state.attempt
-        ? live.errors
-        : state.errors;
+    live !== null && live.attempt === state.attempt
+      ? live.errors
+      : state.errors;
 
   // After each failed submit (and on load with URL errors), focus the first
   // invalid field; the attempt counter makes a repeat failure refocus too.
@@ -157,27 +175,42 @@ export function SearchForm({
     }
   }, [firstInvalid, state.attempt]);
 
-  function handleChange(event: ChangeEvent<HTMLFormElement>) {
-    if (shownErrors === null) {
-      return;
-    }
-    const result = validateJourneyParameters(
-      readRaw(new FormData(event.currentTarget)),
-      now(),
-    );
+  const value = (field: JourneyField): string | null =>
+    state.values?.[field] ?? defaultValues?.[field] ?? null;
+  const valueOr = (field: JourneyField, initial: string): string =>
+    value(field) ?? (defaultValues === null ? initial : "");
+
+  const formRef = useRef<HTMLFormElement>(null);
+  const [stations, setStations] = useState({
+    origin: value("origin") ?? "",
+    destination: value("destination") ?? "",
+  });
+
+  function revalidate(raw: RawJourneyParameters) {
+    const result = validateJourneyParameters(raw, now());
     setLive({
       attempt: state.attempt,
       errors: result.ok ? {} : keepShown(result.errors, shownErrors),
     });
   }
 
-  const value = (field: JourneyField): string | null =>
-    state.values?.[field] ?? defaultValues?.[field] ?? null;
-  const valueOr = (field: JourneyField, initial: string): string =>
-    value(field) ?? (defaultValues === null ? initial : "");
+  function handleChange(event: ChangeEvent<HTMLFormElement>) {
+    revalidate(readRaw(new FormData(event.currentTarget)));
+  }
+
+  // The lookup's input is controlled, so a chosen station is not in the DOM yet; the reported text wins.
+  function handleStation(field: "origin" | "destination", text: string) {
+    const next = { ...stations, [field]: text };
+    setStations(next);
+    revalidate({
+      ...readRaw(new FormData(formRef.current ?? undefined)),
+      ...next,
+    });
+  }
 
   return (
     <form
+      ref={formRef}
       action={formAction}
       noValidate
       onChange={handleChange}
@@ -195,6 +228,10 @@ export function SearchForm({
           label={formStrings.origin.label}
           placeholder={formStrings.origin.placeholder}
           defaultValue={value("origin") ?? ""}
+          takenStation={stations.destination}
+          onValueChange={(text) => {
+            handleStation("origin", text);
+          }}
           {...errorProp(shownErrors, "origin")}
         />
         <StationField
@@ -203,6 +240,10 @@ export function SearchForm({
           label={formStrings.destination.label}
           placeholder={formStrings.destination.placeholder}
           defaultValue={value("destination") ?? ""}
+          takenStation={stations.origin}
+          onValueChange={(text) => {
+            handleStation("destination", text);
+          }}
           {...errorProp(shownErrors, "destination")}
         />
         <Field

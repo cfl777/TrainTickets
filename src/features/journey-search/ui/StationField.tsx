@@ -51,6 +51,7 @@ export function StationField(props: StationFieldProps) {
           value={value}
           onChange={(event) => {
             setValue(event.target.value);
+            props.onValueChange?.(event.target.value);
           }}
           placeholder={placeholder}
           autoCapitalize="words"

@@ -36,7 +36,9 @@ function renderBox(
       </ApiProvider>
     </QueryClientProvider>,
   );
-  const input = screen.getByRole("combobox", { name: "Origin" });
+  const input = screen.getByRole("combobox", {
+    name: props.label ?? "Origin",
+  });
   const formData = () => new FormData(input.closest("form") ?? undefined);
   return { ...utils, input, formData, user: userEvent.setup() };
 }
@@ -124,6 +126,79 @@ describe("StationComboBox", () => {
     const inputRef = vi.fn();
     const { input } = renderBox({ inputRef });
     expect(inputRef).toHaveBeenCalledWith(input);
+  });
+
+  it("greys the taken station out, says whose it is, and skips it with the arrow keys", async () => {
+    const { input, user } = renderBox({
+      id: "destination",
+      label: "Destination",
+      takenStation: " enschede",
+    });
+    await user.click(screen.getByRole("button", { name: /^Show stations/ }));
+
+    const taken = await screen.findByRole("option", {
+      name: "Enschede Origin",
+    });
+    expect(taken).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByText("3 stations")).toBeInTheDocument();
+    expect(await axeWithPopup()).toHaveNoViolations();
+
+    await user.keyboard("{ArrowDown}");
+    expect(screen.getByRole("option", { name: "Almelo" })).toHaveAttribute(
+      "data-focused",
+    );
+    await user.keyboard("{ArrowDown}");
+    expect(screen.getByRole("option", { name: "Hengelo" })).toHaveAttribute(
+      "data-focused",
+    );
+    expect(taken).not.toHaveAttribute("data-focused");
+
+    await user.click(taken);
+    expect(input).toHaveValue("");
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+  });
+
+  it("marks the destination in the origin list, and follows the taken station", async () => {
+    const { user, rerender } = renderBox({ takenStation: "Hengelo" });
+    await user.click(screen.getByRole("button", { name: /^Show stations/ }));
+    expect(
+      await screen.findByRole("option", { name: "Hengelo Destination" }),
+    ).toHaveAttribute("aria-disabled", "true");
+
+    rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <ApiProvider
+          api={createSearchJourneys({ delayMs: 0 })}
+          suggest={createSuggestStations({ delayMs: 0 })}
+        >
+          <form>
+            <StationComboBox
+              id="origin"
+              label="Origin"
+              placeholder="Enschede"
+              defaultValue=""
+              takenStation="Almelo"
+            />
+          </form>
+        </ApiProvider>
+      </QueryClientProvider>,
+    );
+    expect(screen.getByRole("option", { name: "Hengelo" })).not.toHaveAttribute(
+      "aria-disabled",
+    );
+    expect(
+      screen.getByRole("option", { name: "Almelo Destination" }),
+    ).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("reports its text as it is typed and when a station is chosen", async () => {
+    const onValueChange = vi.fn();
+    const { input, user } = renderBox({ onValueChange });
+    await user.type(input, "h");
+    expect(onValueChange).toHaveBeenLastCalledWith("h");
+    await screen.findByRole("option", { name: "Hengelo" });
+    await user.keyboard("{ArrowDown}{Enter}");
+    expect(onValueChange).toHaveBeenLastCalledWith("Hengelo");
   });
 
   it("shares one lookup between prefixes already seen", async () => {
