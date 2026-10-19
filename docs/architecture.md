@@ -217,9 +217,9 @@ App
       │     │  └─ StationComboBox  React Aria ComboBox: input (id, name), toggle, popover with the matches
       │     └─ Field × 2      shared/ui; label + control + hint + error wiring
       └─ SearchResults        props: the union; aria-busy while loading
-         ├─ StatusMessage     role="status", always mounted
          ├─ ErrorMessage      role="alert", only on error; message + Try again; takes focus
-         └─ JourneyTable      props: caption, rows (formatted, with ids)
+         ├─ JourneyTable      props: caption, rows (formatted, with ids)
+         └─ StatusMessage     role="status", always mounted; under the rows as their footer
 ```
 
 - `SearchPage` is a layout. The hook does the work.
