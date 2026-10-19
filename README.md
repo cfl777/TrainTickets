@@ -31,6 +31,7 @@ Read the code in this order. Each file is small and the next one builds on it.
 4. `src/features/journey-search/api/` — the timetable, the fixture builder and `searchJourneys` with its factory.
 5. `src/features/journey-search/model/useJourneySearch.ts` — parse, validate, query, build rows; returns one discriminated union.
 6. `src/features/journey-search/ui/SearchPage.tsx` — composition only.
+7. `src/features/journey-search/api/stations.ts` and `src/features/journey-search/ui/StationField.tsx` — the station lookup: prefix matching in the mock, a lazily loaded React Aria combobox in the form.
 
 Tests sit in a `__tests__` folder beside the files they cover. The pure modules in `model`, `api` and `shared/lib` have 100 % coverage thresholds.
 
@@ -44,13 +45,14 @@ Measured on 18 October 2026 at commit `1a66b5e`: the size from `pnpm build`, the
 
 | Measure                     | Budget       | Measured                |
 | --------------------------- | ------------ | ----------------------- |
-| Initial JavaScript, gzipped | under 100 KB | 81.64 kB                |
+| Initial JavaScript, gzipped | under 100 KB | 84.31 kB                |
+| Station lookup chunk        | under 70 KB  | 59.99 kB, on demand     |
 | Lighthouse performance      | 95 or above  | 100 mobile, 100 desktop |
 | Lighthouse accessibility    | 100          | 100 mobile, 100 desktop |
 
 ## Dependencies
 
-Three runtime dependencies: `react`, `react-dom` and `@tanstack/react-query`. Everything else is development-only. Each package and its one-sentence motivation is listed in [architecture.md](docs/architecture.md#dependencies).
+Four runtime dependencies: `react`, `react-dom`, `@tanstack/react-query` and `react-aria-components` (the station combobox, loaded on demand). Everything else is development-only. Each package and its one-sentence motivation is listed in [architecture.md](docs/architecture.md#dependencies).
 
 ## Continuous integration
 
