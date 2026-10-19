@@ -125,6 +125,32 @@ describe("SearchPage", () => {
     });
   });
 
+  it("focuses the first invalid station field on load, even without focus events", async () => {
+    // A page loaded without window focus (a link opened in a background tab)
+    // moves document.activeElement on focus() but receives no focus events
+    // until the window is focused. Swallowing focusin above React's root
+    // listener reproduces that; the handover to the lazy combobox must not
+    // depend on the event.
+    const swallow = (event: Event) => {
+      event.stopImmediatePropagation();
+    };
+    document.addEventListener("focusin", swallow, true);
+    try {
+      const { container } = renderPage(
+        `/?origin=&destination=Hengelo&date=${tomorrowValue}&passengers=2`,
+      );
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "1 field needs attention",
+      );
+      const origin = await station("Origin");
+      expect(origin).toHaveAttribute("aria-invalid", "true");
+      expect(origin).toHaveFocus();
+      expect(await axe(container)).toHaveNoViolations();
+    } finally {
+      document.removeEventListener("focusin", swallow, true);
+    }
+  });
+
   it("writes the URL on submit and shows the results", async () => {
     const { user } = renderPage("/");
     // Escape closes each lookup popup, which hides the rest of the page while open.

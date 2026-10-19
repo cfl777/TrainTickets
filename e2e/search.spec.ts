@@ -72,3 +72,18 @@ test("shows a focused error with a retry when the search fails", async ({
   await expect(alert.getByRole("button", { name: "Try again" })).toBeVisible();
   await expect(page.getByRole("table")).toHaveCount(0);
 });
+
+test("focuses the first invalid station field when the URL has an error on load", async ({
+  page,
+}) => {
+  await page.goto(
+    `/?origin=&destination=Hengelo&date=${tomorrow()}&passengers=2`,
+  );
+  await expect(page.getByRole("alert")).toHaveText("1 field needs attention");
+  await expect(page.getByText("Enter an origin")).toBeVisible();
+  // The field is a plain input until the lookup chunk arrives; the focus
+  // given to it on load must survive the swap to the combobox.
+  const origin = page.getByRole("combobox", { name: "Origin" });
+  await expect(origin).toBeFocused();
+  await expect(origin).toHaveAttribute("aria-invalid", "true");
+});

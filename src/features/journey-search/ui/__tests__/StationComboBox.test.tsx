@@ -120,9 +120,10 @@ describe("StationComboBox", () => {
     expect(input).not.toHaveAccessibleDescription();
   });
 
-  it("focuses itself when asked to", () => {
-    const { input } = renderBox({ focusOnMount: true });
-    expect(input).toHaveFocus();
+  it("hands its input element to inputRef", () => {
+    const inputRef = vi.fn();
+    const { input } = renderBox({ inputRef });
+    expect(inputRef).toHaveBeenCalledWith(input);
   });
 
   it("shares one lookup between prefixes already seen", async () => {
