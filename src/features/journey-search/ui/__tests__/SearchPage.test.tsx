@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
@@ -197,6 +197,30 @@ describe("SearchPage", () => {
       await screen.findByRole("table", { name: /Enschede to Almelo/ }),
     ).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("2 journeys found");
+  });
+
+  it("forgets the stale notice once the search moves on, so Back to that search starts clean", async () => {
+    const first = `/?origin=Enschede&destination=Hengelo&date=${tomorrowValue}&passengers=2`;
+    const { user } = renderPage(first);
+    await screen.findByRole("table");
+    const destination = await station("Destination");
+    await user.clear(destination);
+    await user.type(destination, "Almelo{Escape}");
+    expect(screen.getByRole("status")).toHaveTextContent(/Results are for/);
+
+    await user.click(screen.getByRole("button", { name: "Search journeys" }));
+    await screen.findByRole("table", { name: /Enschede to Almelo/ });
+
+    // Back to the first search: the form re-mounts matching that URL, so nothing is stale.
+    act(() => {
+      window.history.replaceState(null, "", first);
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    expect(
+      await screen.findByRole("table", { name: /Enschede to Hengelo/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("2 journeys found");
+    expect(screen.getByRole("status")).not.toHaveTextContent(/Results are for/);
   });
 
   it("keeps the retry for the failed search and says which search it is for once the form changes", async () => {
