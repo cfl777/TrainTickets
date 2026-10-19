@@ -21,6 +21,7 @@ import type {
   Journeys,
   SearchJourneys,
 } from "../model/types.ts";
+import { delay } from "./delay.ts";
 import { buildJourneys, type ScheduledJourney } from "./fixtures.ts";
 import { timetable } from "./timetable.ts";
 
@@ -89,12 +90,6 @@ function assertParameters(parameters: JourneyParameters): void {
   ) {
     throw new InvalidParametersError("nrOfPassengers must be 1 to 10");
   }
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
 }
 
 export type SearchJourneysOptions = Readonly<{

@@ -31,7 +31,7 @@ pnpm install
 | `pnpm test:e2e`                     | Playwright: nine end-to-end tests, desktop and mobile projects, against the production build                                                                |
 | `pnpm lint`                         | ESLint with type-aware rules                                                                                                                                |
 | `pnpm format` / `pnpm format:check` | Prettier, write or verify                                                                                                                                   |
-| `pnpm typecheck`                    | `tsc --noEmit` on its own; `pnpm build` runs the same check first, Vite alone does not                                                                      |
+| `pnpm typecheck`                    | `tsc -b` over both projects, the app and the e2e tests with the configs; `pnpm build` runs the same check first, Vite alone does not                        |
 | `pnpm knip`                         | Reports unused files, exports and dependencies; must be empty                                                                                               |
 
 A pre-commit hook runs Prettier and ESLint on staged files, and a commit-msg hook checks the message against Conventional Commits. The hooks are written into `.git/hooks` by `simple-git-hooks` through the `prepare` script, so `pnpm install` sets them up; run `pnpm hooks:install` if they are ever missing.

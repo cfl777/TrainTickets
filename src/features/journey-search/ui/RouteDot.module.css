@@ -1,0 +1,11 @@
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 3px solid var(--color-accent);
+  background: var(--color-card);
+}
+
+.filled {
+  background: var(--color-accent);
+}

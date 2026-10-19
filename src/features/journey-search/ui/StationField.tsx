@@ -17,6 +17,7 @@
 import { lazy, Suspense, useRef, useState } from "react";
 import { Field } from "../../../shared/ui/Field.tsx";
 import { MapPinIcon } from "../../../shared/ui/icons.tsx";
+import { MAX_STATION_LENGTH } from "../model/validation.ts";
 import type { StationFieldProps } from "./StationComboBox.tsx";
 
 const StationComboBox = lazy(() =>
@@ -26,7 +27,7 @@ const StationComboBox = lazy(() =>
 );
 
 export function StationField(props: StationFieldProps) {
-  const { id, label, placeholder, defaultValue, error } = props;
+  const { id, label, placeholder, defaultValue, error, onValueChange } = props;
   const [value, setValue] = useState(defaultValue);
   const fallbackHadFocus = useRef(false);
 
@@ -47,11 +48,11 @@ export function StationField(props: StationFieldProps) {
           name={id}
           type="text"
           required
-          maxLength={100}
+          maxLength={MAX_STATION_LENGTH}
           value={value}
           onChange={(event) => {
             setValue(event.target.value);
-            props.onValueChange?.(event.target.value);
+            onValueChange?.(event.target.value);
           }}
           placeholder={placeholder}
           autoCapitalize="words"

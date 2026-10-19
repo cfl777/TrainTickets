@@ -35,6 +35,7 @@ import {
   ListBoxItem,
   Popover,
 } from "react-aria-components";
+import { cx } from "../../../shared/lib/cx.ts";
 import { isSameText } from "../../../shared/lib/text.ts";
 import fieldStyles from "../../../shared/ui/Field.module.css";
 import { ChevronDownIcon, MapPinIcon } from "../../../shared/ui/icons.tsx";
@@ -43,6 +44,8 @@ import {
   useStationSuggestions,
   type Station,
 } from "../model/useStationSuggestions.ts";
+import { MAX_STATION_LENGTH } from "../model/validation.ts";
+import { RouteDot } from "./RouteDot.tsx";
 import styles from "./StationComboBox.module.css";
 
 export type StationFieldProps = Readonly<{
@@ -62,11 +65,6 @@ type Props = StationFieldProps &
     /** Reaches the input element, so StationField can hand over the fallback's focus. */
     inputRef?: Ref<HTMLInputElement>;
   }>;
-
-/** CSS module keys are string | undefined under noUncheckedIndexedAccess; React Aria wants a string. */
-function cx(...names: (string | undefined)[]): string {
-  return names.filter((name) => name !== undefined).join(" ");
-}
 
 export function StationComboBox({
   id,
@@ -90,9 +88,8 @@ export function StationComboBox({
     .map((station) => station.id);
   const takenTag =
     id === "destination" ? formStrings.ticket.from : formStrings.ticket.to;
-  const takenGlyph = cx(
-    styles.dot,
-    id === "destination" ? undefined : styles.dotTo,
+  const takenGlyph = (
+    <RouteDot filled={id !== "destination"} className={cx(styles.glyph)} />
   );
   // The text-node space before the tag keeps the name two words for a screen reader.
   const takenMark = (
@@ -132,7 +129,7 @@ export function StationComboBox({
           ref={inputRef}
           className={cx(styles.input)}
           placeholder={placeholder}
-          maxLength={100}
+          maxLength={MAX_STATION_LENGTH}
           autoCapitalize="words"
           spellCheck={false}
           autoComplete="off"
@@ -166,9 +163,7 @@ export function StationComboBox({
             >
               {({ isDisabled }) => (
                 <>
-                  {isDisabled ? (
-                    <span className={takenGlyph} aria-hidden="true" />
-                  ) : null}
+                  {isDisabled ? takenGlyph : null}
                   <strong>{station.name.slice(0, typedLength)}</strong>
                   {station.name.slice(typedLength)}
                   {isDisabled ? takenMark : null}

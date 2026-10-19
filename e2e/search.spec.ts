@@ -1,3 +1,4 @@
+// tsconfig.node.json has no DOM lib; the page.evaluate callbacks below need it.
 /// <reference lib="dom" />
 import { expect, test } from "@playwright/test";
 
