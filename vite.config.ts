@@ -6,9 +6,9 @@ import { defineConfig } from "vitest/config";
  *
  * - One config for build, dev server and tests, so they cannot drift.
  * - jsdom for component tests; vitest-axe does not support happy-dom.
- * - Only src/**\/*.test.* are unit tests; Playwright owns e2e/ later.
- * - 100 % coverage only set on the pure layers (model, api, shared/lib).The ui layer
- *   is tested by behaviour and accessibility, not by a percentage.
+ * - Only src/**\/*.test.* are unit tests; Playwright owns e2e/.
+ * - 100 % coverage only set on the pure layers (model, api, shared/lib). The
+ *   ui layer is tested by behaviour and accessibility, not by a percentage.
  */
 export default defineConfig({
   plugins: [react()],

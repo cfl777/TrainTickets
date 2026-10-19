@@ -10,6 +10,11 @@
  * - Two browser APIs jsdom does not implement, matchMedia and
  *   scrollIntoView, which the page uses to scroll results into view on
  *   narrow screens. Stubbed as "wide screen, no motion preference".
+ * - A third, HTMLCanvasElement.getContext, which axe-core's colour-contrast
+ *   matcher calls to detect icon ligatures. jsdom returns null and logs
+ *   "Not implemented" once per axe run; the stub returns the same null
+ *   without the log. Either way colour contrast is not checked here: axe
+ *   records the rule as incomplete, so it needs a real browser.
  */
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
@@ -33,3 +38,4 @@ const matchMedia = (query: string): MediaQueryList =>
 
 vi.stubGlobal("matchMedia", matchMedia);
 Element.prototype.scrollIntoView = () => undefined;
+HTMLCanvasElement.prototype.getContext = () => null;

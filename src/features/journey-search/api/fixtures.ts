@@ -4,7 +4,6 @@
  * - Every service runs every day from tomorrow (+1) to the Friday of next
  *   week (+8), computed from `now` at call time (assumption 1), so a tab
  *   left open past midnight still shifts correctly.
- *   (Review would be completed)
  * - Departure and arrival are local instants built from local parts with
  *   the Date constructor; a 09:00 service is 09:00 in the browser's zone
  *   on every day, including clock-change days (assumption 8).

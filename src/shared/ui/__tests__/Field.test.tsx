@@ -36,7 +36,7 @@ describe("Field", () => {
     expect(screen.getByText("Enter an origin")).toBeInTheDocument();
   });
 
-  it("uses a given id so a summary can link to the field", () => {
+  it("uses a given id so a parent can focus the field", () => {
     render(
       <Field label="Origin" id="origin">
         {(control) => <input type="text" {...control} />}

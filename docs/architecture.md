@@ -87,13 +87,13 @@ src/
         useStationSuggestions.ts    useQuery per normalised prefix; previous list kept while loading
         __tests__/
       ui/                           presentational components + the page
-        SearchPage.tsx              composition only
+        SearchPage.tsx (+ .module.css)  composition only
         SearchForm.tsx (+ .module.css)
         StationField.tsx            lazy boundary: plain input until the combobox chunk arrives
         StationComboBox.tsx (+ .module.css)  React Aria combobox; the only module importing the library
-        SearchResults.tsx
+        SearchResults.tsx (+ .module.css)
         StatusMessage.tsx (+ .module.css)
-        ErrorMessage.tsx
+        ErrorMessage.tsx (+ .module.css)
         JourneyTable.tsx (+ .module.css)
         __tests__/
       index.ts                      public surface: SearchPage, ApiProvider, searchJourneys, suggestStations
@@ -105,7 +105,7 @@ src/
     hooks/
       useSearchParams.ts            URL ↔ state: pushState, popstate
     ui/
-      Field.tsx                     label + control + hint + error wiring
+      Field.tsx (+ .module.css)     label + control + hint + error wiring
       icons.tsx                     four inline SVG paths
       ErrorBoundary.tsx
     styles/
@@ -156,6 +156,7 @@ The form:
 - The submit button is always enabled. "Can only be submitted if valid" is met by preventing submission, not by disabling the control, which would hide the reason from keyboard and screen-reader users.
 - Passengers: `<input type="number" min="1" max="10" step="1" inputmode="numeric">`, the native `spinbutton` that rail sites' plus/minus steppers reimplement. Defaults to 1.
 - Date: `<input type="date" min={today}>`. Defaults to tomorrow (assumption 7).
+- The two defaults apply only when there is no query string. A URL that omits a key shows that field empty, under its error, so what is shown never contradicts the message.
 - Station fields: `autocapitalize="words"`, `spellcheck="false"`, a station name as placeholder; the last field has `enterkeyhint="search"`. Each control carries a decorative inline icon, hidden from assistive tech; the label carries the meaning. One line under the form names the three stations the demo timetable serves.
 
 Validation feedback, following the GOV.UK and NL Design System form patterns:
@@ -264,7 +265,7 @@ Target: WCAG 2.2 level AA.
 | `<html lang="en">`                                                                                                                                                                | 3.1.1                    | lint                                  |
 | Document title reflects the search                                                                                                                                                | 2.4.2                    | component test                        |
 | Decorative spinner `aria-hidden`; animation stopped under `prefers-reduced-motion`                                                                                                | 1.1.1, 2.3.3 (beyond AA) | CSS, manual                           |
-| Native controls only, so name, role and value come from the browser                                                                                                               | 4.1.2                    | by construction                       |
+| Native controls, so name, role and value come from the browser; the one exception, the station combobox, takes them from React Aria                                               | 4.1.2                    | by construction; combobox tests, axe  |
 
 Tooling: `eslint-plugin-jsx-a11y` in lint; `vitest-axe` runs axe-core over every rendered state in the component tests; Lighthouse for contrast, which jsdom cannot measure. Automated tools find roughly 30 to 40 % of accessibility issues; the manual passes cover the rest.
 
@@ -330,7 +331,7 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 - `knip` in CI with zero findings required.
 - StrictMode on in development, which double-invokes effects and proves the hooks are idempotent.
 - CI on a pinned `ubuntu-24.04` image: job 1 runs lint, format check, typecheck, knip, unit tests in both time zones, build with size check; job 2 runs Playwright desktop and mobile; on pull requests a third job posts the gzipped size and its change against `main` as a comment.
-- Hosted preview: Vercel, linked to the GitHub repository (decision 21). `main` deploys to https://train-journeys.vercel.app with `pnpm build`, Node 24 and the pnpm from `packageManager`; preview deployments are switched off, so nothing else is deployed. No `vercel.json`: one route, static output in `dist/`, the build command and output directory set to the framework defaults.
+- Hosted preview: Vercel, linked to the GitHub repository (decision 21a). `main` deploys to https://train-journeys.vercel.app with `pnpm build`, Node 24 and the pnpm from `packageManager`; preview deployments are switched off, so nothing else is deployed. No `vercel.json`: one route, static output in `dist/`, the build command and output directory set to the framework defaults.
 
 ## Dependencies
 
@@ -354,16 +355,16 @@ Node reads `TZ` at startup, so the date suite runs as two invocations: a GitHub 
 
 ## Considered and not adopted
 
-- Zod: one schema for two input sources is the real argument; declined because two of the four rules need custom code regardless and there is one schema in the whole app.
+- Zod: one schema for two input sources is the real argument; declined because two of the five rules need custom code regardless and there is one schema in the whole app.
 - React Router or TanStack Router: a router for a page with no routes.
 - A hand-written reducer instead of TanStack Query: defensible for one call; see Data fetching for why the library was chosen.
 - `use()` with Suspense: not a data-fetching solution on its own.
-- Headless or styled component libraries: no control on this page needs one.
+- Headless or styled component libraries: one control needs one, the station combobox, and it uses React Aria Components (decision 23); every other control stays native.
 - Tailwind, zero-runtime CSS-in-TS, runtime CSS-in-JS: see decisions 09.
 - A date library: nothing needs arithmetic beyond subtraction.
 - React Compiler: nothing to memoise.
 - Server rendering, PWA or offline support, analytics, error reporting: not needed for a single-page mock. The `ErrorBoundary` is where a production application would report.
-- Stylelint: Prettier formats the five stylesheets.
+- Stylelint: Prettier formats the stylesheets.
 
 ## Browser support
 
@@ -375,4 +376,4 @@ Gated behind the core being implemented, tested and documented.
 
 1. Station lookup: built (decision 23). A `suggestStations` mock with normalised prefix matching and a React Aria combobox, loaded on demand, showing the lookup-versus-search separation in code.
 2. Earlier and later: the unit is the day, since the contract has no time. Either day navigation through the URL or appending adjacent days with `useInfiniteQuery`.
-3. Polish: a swap button between origin and destination; dark mode through a `prefers-color-scheme` block over the tokens.
+3. Polish: dark mode is built (decision 17), the same tokens redefined under `prefers-color-scheme`. The swap button between origin and destination stays gated.

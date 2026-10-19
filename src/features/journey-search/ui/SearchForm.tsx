@@ -17,6 +17,8 @@
  *   the submitted values in state and the inputs read defaultValue from
  *   there first; a failed submit never wipes what was typed.
  * - Defaults: passengers 1, date tomorrow (assumption 7); min date today.
+ *   They apply only without a query string: a URL that omits a key shows
+ *   that field empty, under its error, so the value never contradicts it.
  * - Origin and destination are StationFields: a lookup over the same
  *   input contract (name, id, text value), so this file reads FormData
  *   exactly as before. The lookup keeps its text in React state, which the
@@ -171,6 +173,8 @@ export function SearchForm({
 
   const value = (field: JourneyField): string | null =>
     state.values?.[field] ?? defaultValues?.[field] ?? null;
+  const valueOr = (field: JourneyField, initial: string): string =>
+    value(field) ?? (defaultValues === null ? initial : "");
 
   return (
     <form
@@ -214,7 +218,7 @@ export function SearchForm({
               type="date"
               required
               min={todayValue}
-              defaultValue={value("date") ?? tomorrowValue}
+              defaultValue={valueOr("date", tomorrowValue)}
             />
           )}
         </Field>
@@ -235,7 +239,7 @@ export function SearchForm({
               step={1}
               inputMode="numeric"
               enterKeyHint="search"
-              defaultValue={value("passengers") ?? "1"}
+              defaultValue={valueOr("passengers", "1")}
             />
           )}
         </Field>

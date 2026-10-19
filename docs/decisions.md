@@ -28,7 +28,7 @@ Nine ambiguities were resolved before anything else, because the API, validation
 
 **Decided:** one hand-written `validateJourneyParameters(raw, now)` in `model`, used by the form action and the URL parser, returning per-field errors. React 19 `<form action>` with `useActionState`; the form is keyed on the URL search string so React's post-action reset lands on fresh defaults. Uncontrolled inputs read from `FormData`. `noValidate` on the form so our feedback is the only feedback. Submit button always enabled. Passengers is a native number input. Date input has `min` set to today. Origin equal to destination is rejected. Validation feedback follows the GOV.UK and NL Design System pattern: summary with focus on submit, inline messages, per-field clearing after the first failed submit, no success ticks, instruction-style messages.
 
-**Options considered:** native HTML validation only (uneven per browser, does nothing for URL input). React Hook Form with Zod (two dependencies for four fields). Zod alone (one schema for two input sources is the real argument; declined because two of the four rules need custom code regardless, and there is only one schema in the app to amortise over). Disabled submit button (hides the reason from keyboard and screen-reader users). `<select>` for passengers (sturdier, but the number input is what the brief says and is the native `spinbutton` that rail sites' steppers reimplement).
+**Options considered:** native HTML validation only (uneven per browser, does nothing for URL input). React Hook Form with Zod (two dependencies for four fields). Zod alone (one schema for two input sources is the real argument; declined because two of the five rules need custom code regardless, and there is only one schema in the app to amortise over). Disabled submit button (hides the reason from keyboard and screen-reader users). `<select>` for passengers (sturdier, but the number input is what the brief says and is the native `spinbutton` that rail sites' steppers reimplement).
 
 ## 06 · The mock search API (17 Oct 2026)
 
@@ -76,7 +76,7 @@ Nine ambiguities were resolved before anything else, because the API, validation
 
 **Decided:** five documents: `README.md` in the root and `run.md`, `assumptions.md`, `architecture.md`, `decisions.md` under `docs/`. A dependency table with three runtime packages. TypeScript strict flags, a flat ESLint config with type-aware rules and import boundaries, minimal Prettier, editor settings, `lint-staged` with `simple-git-hooks` at pre-commit, `knip` in CI, a size-check script, Conventional Commits, CI in two jobs, a hosted preview.
 
-**Options considered:** CI as the only gate without hooks (shorter dependency list; declined because a clean commit history is part of what is reviewed). Stylelint (Prettier formats the five stylesheets).
+**Options considered:** CI as the only gate without hooks (shorter dependency list; declined because a clean commit history is part of what is reviewed). Stylelint (Prettier formats the stylesheets).
 
 ## 14 · Stretch: station lookup (16 Oct 2026, gated; built 18 Oct 2026, see 23)
 
@@ -92,7 +92,7 @@ A final pass over the whole design. Adopted: form defaults (passengers 1, date t
 
 ## 17 · Stretch: polish (17 Oct 2026, gated)
 
-A swap button between origin and destination, and dark mode through a `prefers-color-scheme` block over the tokens. Dark mode was built on 18 Oct 2026: the same fourteen token names redefined once, every text, border and focus pair re-checked against WCAG AA (the tightest is the input border at 5.3:1 against a 3:1 requirement), `color-scheme` set so the native date picker follows, and no component aware of the mode. The swap button stays gated.
+A swap button between origin and destination, and dark mode through a `prefers-color-scheme` block over the tokens. Dark mode was built on 18 Oct 2026: the same sixteen token names redefined once, every text, border and focus pair re-checked against WCAG AA (the tightest is the input border at 5.3:1 against a 3:1 requirement), `color-scheme` set so the native date picker follows, and no component aware of the mode. The swap button stays gated.
 
 ## 18 · Commit message linting (17 Oct 2026)
 
@@ -112,17 +112,17 @@ A swap button between origin and destination, and dark mode through a `prefers-c
 
 **Options considered:** Committing to `main` with CI reporting after the fact (how Phase 2 was done; a red run would already be in the history). Squash merging (one commit per pull request, which would discard the granular history). Merge commits (keep the commits but add a merge node per pull request; declined for the linear history).
 
-## 21 · Hosted preview (18 Oct 2026)
+## 21a · Hosted preview (18 Oct 2026)
 
 **Decided:** a Vercel project named `train-journeys`, linked to the GitHub repository through the Git integration. `main` deploys to production at https://train-journeys.vercel.app with the repository's own `pnpm build`, so the typecheck and the size check gate the deploy as well. Preview deployments are switched off: only `main` is deployed, and the site is public. The README names the link and the commit it reflected when the numbers were taken. The site allows a first look without installing anything, and it gives the Lighthouse numbers a real origin instead of a local preview server.
 
 **Options considered:** No hosted link, as the brief asks only for run instructions (declined, but the local route stays first in the README and the hosted one is an addition, not a replacement). Per-pull-request preview deployments, Vercel's default (switched off: CI already builds every pull request, the previews would sit behind a Vercel login, and one live site is easier to reason about than many). Vercel's default protection, which leaves the production domain open and every other deployment URL behind a login (kept as it is: a login wall on the link would be worse than no link). A stale link is the main cost: mitigated by production tracking `main` automatically and by the README naming the commit. The Vercel hobby plan is for non-commercial use, which an assignment is; a company would use a team plan or its own hosting. GitHub Pages (needs a workflow and a base path change for the repository subpath). Netlify (equivalent; Vercel chosen because the account already existed).
 
-## 21 · Visual direction: the ticket (18 Oct 2026)
+## 21b · Visual direction: the ticket (18 Oct 2026)
 
 **Decided:** of three directions mocked up (a quiet service look, a departure board with a dark header band, and a ticket), the ticket: off-white page, the form as a white card with a teal edge and inline icons, examples as placeholders instead of hint lines, results as spaced white rows with times in bold and the price in a tinted pill. The accent moved from blue to teal (6.1:1 on white, so it doubles as the focus ring). Everything stays within the constraints: no component library, system font, the existing tokens, AA contrast, a real table for results. A note under the form names the three stations the demo serves, since nothing else told a visitor what to type.
 
-**Options considered:** the quiet service look (closest to the first build; least visual identity). The departure board (strongest identity, but a dark band over a single form reads as decoration). Icons from a library (three inline SVG paths cost nothing and keep the dependency list as it was).
+**Options considered:** the quiet service look (closest to the first build; least visual identity). The departure board (strongest identity, but a dark band over a single form reads as decoration). Icons from a library (four inline SVG paths cost nothing and keep the dependency list as it was).
 
 ## 22 · Inline errors instead of an error summary (18 Oct 2026)
 

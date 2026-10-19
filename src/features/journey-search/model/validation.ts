@@ -3,7 +3,8 @@
  * and the URL parser. Goals:
  *
  * - One set of rules, so the form and a hand-edited URL are judged alike.
- * - All fields are checked at once; the error summary needs every message.
+ * - All fields are checked at once, so one submit shows every message
+ *   under its field (decision 22).
  * - "Parse, don't validate": on success the result is the branded
  *   ValidJourneyParameters, with trimmed names, a local-midnight Date and
  *   an integer passenger count. This is the only file that constructs it.
