@@ -12,6 +12,7 @@
  *   assistive tech, the label carries the meaning.
  */
 import { useId, type ReactNode } from "react";
+import { cx } from "../lib/cx.ts";
 import styles from "./Field.module.css";
 
 type ControlProps = Readonly<{
@@ -48,11 +49,10 @@ export function Field({ label, hint, error, id, icon, children }: FieldProps) {
     ...(error === undefined ? {} : { "aria-invalid": true as const }),
   };
 
-  // CSS module keys are string | undefined under noUncheckedIndexedAccess.
-  const className =
-    error === undefined
-      ? styles.field
-      : `${styles.field ?? ""} ${styles.hasError ?? ""}`;
+  const className = cx(
+    styles.field,
+    error === undefined ? undefined : styles.hasError,
+  );
 
   return (
     <div className={className}>

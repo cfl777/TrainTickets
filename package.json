@@ -13,7 +13,7 @@
     "size": "size-limit",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "tsc -p tsconfig.app.json --noEmit",
+    "typecheck": "tsc -b",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",

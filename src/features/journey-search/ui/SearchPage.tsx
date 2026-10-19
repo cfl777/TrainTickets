@@ -17,6 +17,7 @@
  */
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "../../../shared/hooks/useSearchParams.ts";
+import { cx } from "../../../shared/lib/cx.ts";
 import { toSearchParams } from "../model/searchParams.ts";
 import {
   appTitle,
@@ -80,7 +81,7 @@ export function SearchPage() {
               </span>
               <span className={styles.line} />
               <span className={styles.stop}>
-                <span className={[styles.dot, styles.dotTo].join(" ")} />{" "}
+                <span className={cx(styles.dot, styles.dotTo)} />{" "}
                 <span>{formStrings.ticket.to}</span>
               </span>
             </p>

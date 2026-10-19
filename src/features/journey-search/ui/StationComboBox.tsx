@@ -35,6 +35,7 @@ import {
   ListBoxItem,
   Popover,
 } from "react-aria-components";
+import { cx } from "../../../shared/lib/cx.ts";
 import { isSameText } from "../../../shared/lib/text.ts";
 import fieldStyles from "../../../shared/ui/Field.module.css";
 import { ChevronDownIcon, MapPinIcon } from "../../../shared/ui/icons.tsx";
@@ -62,11 +63,6 @@ type Props = StationFieldProps &
     /** Reaches the input element, so StationField can hand over the fallback's focus. */
     inputRef?: Ref<HTMLInputElement>;
   }>;
-
-/** CSS module keys are string | undefined under noUncheckedIndexedAccess; React Aria wants a string. */
-function cx(...names: (string | undefined)[]): string {
-  return names.filter((name) => name !== undefined).join(" ");
-}
 
 export function StationComboBox({
   id,
