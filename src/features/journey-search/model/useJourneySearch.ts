@@ -2,8 +2,9 @@
  * Parse, validate, query, build rows: one hook, one union (decision 07).
  * Goals:
  *
- * - The only file that imports TanStack Query; components switch on the
- *   returned union and never see the library.
+ * - Components never import TanStack Query; they switch on the returned
+ *   union and never see the library (the station lookup hook is the one
+ *   other query).
  * - No query until validation passed: skipToken keeps the query off for
  *   idle and invalid URLs, so the API is never called with bad input.
  * - The query key is the validated, normalised parameters with the date

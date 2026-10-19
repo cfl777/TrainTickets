@@ -14,8 +14,9 @@ test-results/
 .env.*
 !.env.example
 
-# editor and OS
+# editor, tooling and OS
 .idea/
+.claude/
 .DS_Store
 Thumbs.db
 *.log

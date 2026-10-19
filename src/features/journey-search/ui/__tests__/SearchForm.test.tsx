@@ -188,6 +188,21 @@ describe("SearchForm", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows a key the URL omits as empty, not as the default", async () => {
+    await renderForm({
+      defaultValues: {
+        origin: "Enschede",
+        destination: "Hengelo",
+        date: "2026-10-21",
+        passengers: null,
+      },
+      initialErrors: { passengers: "Choose between 1 and 10 passengers" },
+    });
+    expect(screen.getByLabelText("Passengers")).toHaveValue(null);
+    expect(screen.getByLabelText("Passengers")).toHaveFocus();
+    expect(screen.getByLabelText("Travel date")).toHaveValue("2026-10-21");
+  });
+
   it("has no accessibility violations before and after a failed submit", async () => {
     const { container, user } = await renderForm();
     expect(await axe(container)).toHaveNoViolations();

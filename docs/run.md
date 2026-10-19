@@ -21,18 +21,18 @@ pnpm install
 
 ## Scripts
 
-| Command                             | What it does                                                                                  |
-| ----------------------------------- | --------------------------------------------------------------------------------------------- |
-| `pnpm dev`                          | Starts the Vite dev server at http://localhost:5173 with React Query Devtools mounted         |
-| `pnpm build`                        | Production build into `dist/`, then the size check (fails above 100 KB gzipped of JavaScript) |
-| `pnpm preview`                      | Serves `dist/` locally                                                                        |
-| `pnpm test`                         | Unit and component tests with Vitest, in the current time zone                                |
-| `pnpm test:coverage`                | Same, with the V8 coverage report; `model` and `api` must reach 100 %                         |
-| `pnpm test:e2e`                     | Playwright: three end-to-end tests, desktop and mobile projects, against the production build |
-| `pnpm lint`                         | ESLint with type-aware rules                                                                  |
-| `pnpm format` / `pnpm format:check` | Prettier, write or verify                                                                     |
-| `pnpm typecheck`                    | `tsc --noEmit` (Vite does not typecheck during build)                                         |
-| `pnpm knip`                         | Reports unused files, exports and dependencies; must be empty                                 |
+| Command                             | What it does                                                                                                                                                |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`                          | Starts the Vite dev server at http://localhost:5173 with React Query Devtools mounted                                                                       |
+| `pnpm build`                        | Typecheck, production build into `dist/`, then the size check (fails above 100 kB gzipped for the initial JavaScript or 70 kB for the station lookup chunk) |
+| `pnpm preview`                      | Serves `dist/` locally                                                                                                                                      |
+| `pnpm test`                         | Unit and component tests with Vitest, in the current time zone                                                                                              |
+| `pnpm test:coverage`                | Same, with the V8 coverage report; `model` and `api` must reach 100 %                                                                                       |
+| `pnpm test:e2e`                     | Playwright: three end-to-end tests, desktop and mobile projects, against the production build                                                               |
+| `pnpm lint`                         | ESLint with type-aware rules                                                                                                                                |
+| `pnpm format` / `pnpm format:check` | Prettier, write or verify                                                                                                                                   |
+| `pnpm typecheck`                    | `tsc --noEmit` on its own; `pnpm build` runs the same check first, Vite alone does not                                                                      |
+| `pnpm knip`                         | Reports unused files, exports and dependencies; must be empty                                                                                               |
 
 A pre-commit hook runs Prettier and ESLint on staged files, and a commit-msg hook checks the message against Conventional Commits. The hooks are written into `.git/hooks` by `simple-git-hooks` through the `prepare` script, so `pnpm install` sets them up; run `pnpm hooks:install` if they are ever missing.
 
