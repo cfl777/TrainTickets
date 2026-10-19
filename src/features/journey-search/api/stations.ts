@@ -28,12 +28,15 @@ export const stations: readonly Station[] = Object.freeze(
   names.map((name) => Object.freeze({ id: name.toLowerCase(), name })),
 );
 
+/** True when the station's name starts with the query; every name starts with the empty query. */
+export function matchesPrefix(station: Station, query: string): boolean {
+  const needle = query.trim();
+  return isSameText(station.name.slice(0, needle.length), needle);
+}
+
 /** Stations whose name starts with the query; an empty query lists them all. */
 export function matchStations(query: string): readonly Station[] {
-  const needle = query.trim();
-  return stations.filter((station) =>
-    isSameText(station.name.slice(0, needle.length), needle),
-  );
+  return stations.filter((station) => matchesPrefix(station, query));
 }
 
 const DEFAULT_DELAY_MS = 150;

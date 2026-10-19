@@ -99,6 +99,23 @@ describe("StationComboBox", () => {
     expect(formData().get("origin")).toBe("Zwolle");
   });
 
+  it("offers only stations matching the typed text while the lookup is slow", async () => {
+    const instant = createSuggestStations({ delayMs: 0 });
+    const slowAfterMount: SuggestStations = (query) =>
+      query === "" ? instant(query) : new Promise(() => undefined);
+    const { input, user } = renderBox({}, slowAfterMount);
+    await user.type(input, "En");
+
+    expect(
+      await screen.findByRole("option", { name: "Enschede" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("option", { name: "Almelo" }),
+    ).not.toBeInTheDocument();
+    await user.keyboard("{ArrowDown}{Enter}");
+    expect(input).toHaveValue("Enschede");
+  });
+
   it("says it is searching while the first lookup is pending", async () => {
     const never: SuggestStations = () => new Promise(() => undefined);
     const { input, user } = renderBox({}, never);

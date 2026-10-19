@@ -84,7 +84,7 @@ src/
         strings.ts                  all UI copy
         useSearchApi.tsx            ApiProvider, useSearchApi, useSuggestStations: inject the two API functions
         useJourneySearch.ts         parse → validate → useQuery → rows; returns a union
-        useStationSuggestions.ts    useQuery per normalised prefix; previous list kept while loading
+        useStationSuggestions.ts    useQuery per normalised prefix; previous matches kept while loading
         __tests__/
       ui/                           presentational components + the page
         SearchPage.tsx (+ .module.css)  composition only
