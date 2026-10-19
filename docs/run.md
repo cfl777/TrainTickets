@@ -28,7 +28,7 @@ pnpm install
 | `pnpm preview`                      | Serves `dist/` locally                                                                                                                                      |
 | `pnpm test`                         | Unit and component tests with Vitest, in the current time zone                                                                                              |
 | `pnpm test:coverage`                | Same, with the V8 coverage report; `model` and `api` must reach 100 %                                                                                       |
-| `pnpm test:e2e`                     | Playwright: five end-to-end tests, desktop and mobile projects, against the production build                                                                |
+| `pnpm test:e2e`                     | Playwright: six end-to-end tests, desktop and mobile projects, against the production build                                                                 |
 | `pnpm lint`                         | ESLint with type-aware rules                                                                                                                                |
 | `pnpm format` / `pnpm format:check` | Prettier, write or verify                                                                                                                                   |
 | `pnpm typecheck`                    | `tsc --noEmit` on its own; `pnpm build` runs the same check first, Vite alone does not                                                                      |
