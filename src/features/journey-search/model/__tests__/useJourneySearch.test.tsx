@@ -3,12 +3,15 @@ import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createSearchJourneys } from "../../api/searchJourneys.ts";
+import { createSuggestStations } from "../../api/stations.ts";
 import type { JourneyParameters, Journeys } from "../types.ts";
 import {
   useJourneySearch,
   type JourneySearchState,
 } from "../useJourneySearch.ts";
 import { ApiProvider } from "../useSearchApi.tsx";
+
+const suggest = createSuggestStations({ delayMs: 0 });
 
 const tuesday = new Date(2026, 9, 20, 15, 30);
 const now = () => tuesday;
@@ -23,7 +26,9 @@ function setup(
 ) {
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={client}>
-      <ApiProvider api={api}>{children}</ApiProvider>
+      <ApiProvider api={api} suggest={suggest}>
+        {children}
+      </ApiProvider>
     </QueryClientProvider>
   );
   return renderHook(
@@ -182,7 +187,9 @@ describe("useJourneySearch", () => {
     const api = createSearchJourneys({ delayMs: 0, now });
     const wrapper = ({ children }: { children: ReactNode }) => (
       <QueryClientProvider client={new QueryClient()}>
-        <ApiProvider api={api}>{children}</ApiProvider>
+        <ApiProvider api={api} suggest={suggest}>
+          {children}
+        </ApiProvider>
       </QueryClientProvider>
     );
     const farFuture =

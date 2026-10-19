@@ -20,6 +20,14 @@ export const formStrings = {
   passengers: { label: "Passengers" },
   submit: "Search journeys",
   stationsNote: "The demo timetable serves Enschede, Hengelo and Almelo.",
+  /** Copy of the station lookup popup. */
+  stations: {
+    searching: "Searching stations",
+    none: "No stations match",
+    count: (n: number): string =>
+      n === 1 ? "1 station" : `${String(n)} stations`,
+    toggle: "Show stations",
+  },
   /** Read by screen readers after a failed submit; the messages themselves sit under the fields. */
   errorsAnnouncement: (count: number): string =>
     count === 1

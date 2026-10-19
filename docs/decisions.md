@@ -78,7 +78,7 @@ Nine ambiguities were resolved before anything else, because the API, validation
 
 **Options considered:** CI as the only gate without hooks (shorter dependency list; declined because a clean commit history is part of what is reviewed). Stylelint (Prettier formats the five stylesheets).
 
-## 14 · Stretch: station lookup (16 Oct 2026, gated)
+## 14 · Stretch: station lookup (16 Oct 2026, gated; built 18 Oct 2026, see 23)
 
 A `suggestStations` mock with normalised prefix matching, and an accessible combobox in the UI, with React Aria Components as the chosen route if built. Starts only after the core is implemented, tested and documented. The mock is added together with the UI, never alone.
 
@@ -131,3 +131,15 @@ A swap button between origin and destination, and dark mode through a `prefers-c
 **Why:** the summary pattern was designed for long government forms, where a list at the top is a table of contents for the errors. On a form with four fields on one screen it duplicated every message, dominated the card, and read as heavy. Focusing the first invalid field is the pattern most product forms use and is simpler to explain.
 
 **Options considered:** keeping the summary as a single quiet line with links (lighter, but still a duplicate of what is under the fields). No announcement at all (sighted users would see the messages but screen-reader users would hear only a focus change; rejected).
+
+## 23 · Station lookup: React Aria, loaded on demand (18 Oct 2026)
+
+**Decided:** the station fields are a combobox from React Aria Components over a `suggestStations` mock (prefix matching, the same collator as the search, an empty query lists every station). The library is reached only through a dynamic import in `StationField`, so Vite ships it as its own chunk; until it arrives the field is the plain input it replaces, with the same id, name, label and error, and hands over whatever was typed or focused. The combobox keeps the form contract: the text is the value (`allowsCustomValue`), FormData reads it by name, validation stays in the model and its message is passed in as the field's error. The size check now has two entries: the initial JavaScript under 100 kB and the lookup chunk under 70 kB.
+
+**Why a library here:** a combobox is the one control on the page where the native element is not enough, and hand-rolling the ARIA pattern (roles, active descendant, keyboard, live announcement of the option count, popover placement and dismissal) is where accessibility bugs come from. React Aria is the headless library decision 09 reserved for exactly this case.
+
+**Why on demand:** measured on a probe branch, the combobox in the initial bundle took it from 83.1 to 143.5 kB gzipped, over the budget that decision 19 enforces and that stands in for the brief's performance expectations. As a separate chunk the initial bundle is 84.3 kB and the chunk 60.0 kB, requested at first render and cached by the browser afterwards.
+
+**Consequences accepted:** while a popup is open React Aria hides the rest of the page from assistive technology, so tests close the popup before reaching for other controls; a plain click outside still works. React resets the form after an action, which would clear the combobox state, so the two station fields re-mount on each failed attempt with the submitted values. Enter with the popup open commits the highlighted or typed station and a second Enter submits, as on most rail sites.
+
+**Options considered:** a `datalist` (no option styling, uneven screen-reader support, no control over the empty state). A hand-rolled ARIA combobox (about as much code as this feature again, and the part most likely to be wrong). Keeping the library in the initial bundle (simplest, but 43 kB over budget). Raising the budget (the budget is the point).
